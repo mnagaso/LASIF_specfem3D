@@ -71,7 +71,9 @@ setup_config = dict(
         "geojson",
         "HinetPy",
         "Pillow",
-        "instaseis"
+        "instaseis",
+        "h5py",
+        "keyring"
     ],
     package_data={
         "lasif": get_package_data()},

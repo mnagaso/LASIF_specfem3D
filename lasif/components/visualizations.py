@@ -29,20 +29,20 @@ class VisualizationsComponent(Component):
         import matplotlib.pyplot as plt
         if not ax:
             ax = plt.subplot(111)
-        
+
         # from obspy.core.inventory.inventory.py
         import warnings
         import matplotlib.pyplot as plt
         if time is not None:
             inventory = inventory.select(time=time, keep_empty=True)
-            
+
 
         # lat/lon coordinates, magnitudes, dates
         lats = []
         lons = []
         labels = []
         colors = []
-        
+
         color_per_network = True
         if color_per_network:
             from matplotlib.cm import get_cmap
@@ -73,14 +73,14 @@ class VisualizationsComponent(Component):
                     continue
                 else:
                     stations.append(station)
-                
+
                 if color_per_network:
-                    
+
                     color_ = color_per_network.get(net.code, "k")
                 else:
                     label_ = "%s.%s"%(net.code, sta.code)
                     color_ = color
-                
+
                 lats.append(sta.latitude)
                 lons.append(sta.longitude)
                 labels.append(label_)
@@ -92,7 +92,7 @@ class VisualizationsComponent(Component):
         if time is not None:
             ax.set_title('%d available stations at %s'\
                       %(len(lats), time.datetime.strftime("%Y-%m-%d")))
-                
+
         # Setting the picker overwrites the edgecolor attribute on certain
         # matplotlib and basemap versions. Fix it here.
         scatter_stations._edgecolors = np.array([[0.0, 0.0, 0.0, 1.0]])
@@ -102,8 +102,8 @@ class VisualizationsComponent(Component):
                             bbox=dict(boxstyle="round", fc="w"),
                             arrowprops=dict(arrowstyle="->"))
         annot.set_visible(False)
-        
-        def hover_stations(event):        
+
+        def hover_stations(event):
             vis = annot.get_visible()
             cont, ind = scatter_stations.contains(event)
             if cont:
@@ -120,8 +120,8 @@ class VisualizationsComponent(Component):
 
         fig.canvas.mpl_connect("button_press_event", hover_stations)
         return len(lats)
-    
-    
+
+
     def plot_data_availability(self, inventory, start_date, end_date):
         from matplotlib.cm import get_cmap
         colormap="Paired"
@@ -129,7 +129,7 @@ class VisualizationsComponent(Component):
         cmap = get_cmap(name=colormap, lut=len(codes))
         color_per_network = dict([(code, cmap(i))
                                   for i, code in enumerate(sorted(codes))])
-        
+
         stations = []
         for net in codes:
             inv = inventory.select(network = net)
@@ -141,7 +141,7 @@ class VisualizationsComponent(Component):
         number_of_stations = len(stations)
         print("%d available stations"%number_of_stations)
         print("for networks:")
-            
+
         import numpy as np
         from datetime import timedelta
         from matplotlib.dates import date2num, num2date
@@ -150,7 +150,7 @@ class VisualizationsComponent(Component):
         import matplotlib.pyplot as plt
         from obspy.core import UTCDateTime
         d1 = start_date.datetime
-        d2 = end_date.datetime   
+        d2 = end_date.datetime
         dates = [d1 + timedelta(days=x) for x in range((d2-d1).days + 1)]
         dates_utc = [UTCDateTime(date.year,date.month,date.day) for date in dates]
         matrix = np.zeros((number_of_stations,len(dates_utc)),dtype = int)
@@ -177,13 +177,13 @@ class VisualizationsComponent(Component):
                     ind_ok = [i for i,date in enumerate(dates_utc) if date >=t1 and date<=t2]
                     matrix[ind_sta, ind_ok] = 1
                     matrix_color[ind_sta, ind_ok] = [i for i, n in enumerate(color_per_network) if nnet.code in n][0]
-                    
-                    
-        
-        plt.figure(figsize=(12, 7)) 
-        gs = gridspec.GridSpec(2, 1, height_ratios=[4, 1])  
-        ax0 = plt.subplot(gs[0])   
-        
+
+
+
+        plt.figure(figsize=(12, 7))
+        gs = gridspec.GridSpec(2, 1, height_ratios=[4, 1])
+        ax0 = plt.subplot(gs[0])
+
         plt.imshow(matrix_color, interpolation="none", aspect='auto', cmap=cmap,
                    vmin=0, vmax=len(codes), extent=(date2num(d1), date2num(d2),
                                             0, number_of_stations), origin='lower')
@@ -193,7 +193,7 @@ class VisualizationsComponent(Component):
         plt.yticks(np.arange(number_of_stations)+0.5, stations)
         plt.title('Data availability between %s and %s'%(start_date.datetime.strftime("%Y-%m-%d"),
                                                          end_date.datetime.strftime("%Y-%m-%d")))
-        
+
         ax1 = plt.subplot(gs[1], sharex=ax0)
         plt.plot(dates, np.sum(matrix, axis=0))
         ax1.set_ylim((-0.1, np.amax(np.sum(matrix, axis=0))+0.1))
@@ -201,12 +201,12 @@ class VisualizationsComponent(Component):
         plt.gcf().autofmt_xdate()
         plt.grid()
         plt.tight_layout()
-        
+
         return ax0, ax1
-    
-            
-        
-        
+
+
+
+
     def plot_stations(self,plot_relief=True, color_per_network=True):
         """
         Plots the domain and locations for all stations on the map.
@@ -233,7 +233,7 @@ class VisualizationsComponent(Component):
                 stations_all[station]={"latitude": channel["latitude"],
                                        "longitude": channel["longitude"]}
         stations = stations_all
-            
+
         if color_per_network:
             from matplotlib.cm import get_cmap
             colormap="Paired"
@@ -243,8 +243,8 @@ class VisualizationsComponent(Component):
                                       for i, code in enumerate(sorted(codes))])
         else:
             color = "red"
-        
-            
+
+
         if plot_relief:
             m = self.comm.project.domain.plot(skip_map_features=True)
             m.shadedrelief()
@@ -295,9 +295,9 @@ class VisualizationsComponent(Component):
                             bbox=dict(boxstyle="round", fc="w"),
                             arrowprops=dict(arrowstyle="->"))
         annot.set_visible(False)
-        
 
-        def hover_stations(event):        
+
+        def hover_stations(event):
             vis = annot.get_visible()
             cont, ind = scatter_stations.contains(event)
             if cont:
@@ -312,7 +312,7 @@ class VisualizationsComponent(Component):
                     annot.set_visible(False)
                     fig.canvas.draw_idle()
 
-        fig.canvas.mpl_connect("button_press_event", hover_stations) 
+        fig.canvas.mpl_connect("button_press_event", hover_stations)
 
 
     def plot_stations_for_event(self,event_name, iteration_name = "raw", plot_relief=True, color = 'red', ax=None):
@@ -417,11 +417,11 @@ class VisualizationsComponent(Component):
         else:
             msg = "Unknown plot_type"
             raise LASIFError(msg)
-            
-            
+
+
     def plot_beachball_arrivals(self, event_info, stations, Phases=['P'], beachcolor="red",ax=None):
         from obspy.imaging.beachball import beach
-        
+
         #https://docs.obspy.org/packages/obspy.taup.html
         taup_phases = ['P', 'pP', 'sP', 'PcP', 'PP', 'PKiKP', 'sPKiKP', 'S', 'pS', 'SP',
                        'sS', 'PS', 'SKS', 'SKKS', 'ScS', 'SKiKP', 'pSKS', 'sSKS', 'SS',
@@ -430,7 +430,7 @@ class VisualizationsComponent(Component):
         for phase in Phases:
             if phase not in taup_phases:
                 raise LASIFError('%s not in taup phases\nshould be within %s'%(phase, ', '.join(taup_phases)))
-        
+
         # compute ray parameters and plot them on beachball
         def compute_ray_parameters(event_info, stations, Phases):
             from obspy.geodetics.base import gps2dist_azimuth, locations2degrees
@@ -441,10 +441,10 @@ class VisualizationsComponent(Component):
             for point in stations:
                 station = stations[point]
                 epicentral_distance, azimuth, baz = gps2dist_azimuth(
-                    event_info["latitude"], event_info["longitude"], 
+                    event_info["latitude"], event_info["longitude"],
                     station["latitude"],station["longitude"])
                 dist_in_deg = locations2degrees(
-                    event_info["latitude"], event_info["longitude"], 
+                    event_info["latitude"], event_info["longitude"],
                     station["latitude"],station["longitude"])
                 tts = earth_model.get_travel_times(source_depth_in_km=event_info["depth_in_km"],
                                                         distance_in_degree=dist_in_deg,
@@ -453,25 +453,25 @@ class VisualizationsComponent(Component):
                     azimuths.append(baz)
                     takeoff.append(tts[0].takeoff_angle)
             return azimuths, takeoff
-        
+
         # beachball plot
-        focmec = [event_info["m_rr"], event_info["m_tt"], 
+        focmec = [event_info["m_rr"], event_info["m_tt"],
                   event_info["m_pp"], event_info["m_rt"],
                   event_info["m_rp"], event_info["m_tp"]]
         mybeachball = beach(focmec, linewidth=1, xy=(0.5,0.5), width=1., facecolor=beachcolor)
         ax.add_collection(mybeachball)
         ax.set_aspect('equal')
         ax.set_axis_off()
-        
+
         # arrival plot - define axes
         import matplotlib.pyplot as plt
         figure = plt.gcf()
-        subax = figure.add_axes(ax.get_position(), 
+        subax = figure.add_axes(ax.get_position(),
                                   projection='polar', label='pol', frameon=False)
         subax.set_aspect('equal')
         subax.set_theta_direction(-1)
         subax.set_theta_zero_location("N")
-        
+
         # define colors
         if len(Phases)>2:
             from matplotlib.cm import get_cmap
@@ -484,7 +484,7 @@ class VisualizationsComponent(Component):
                                Phases[1]: "blue"}
         elif len(Phases)==1:
             color_per_phase = {Phases[0]: "black"}
-            
+
         # loop on Phases
         from random import randint
         for i, phase in enumerate(Phases):
@@ -505,11 +505,11 @@ class VisualizationsComponent(Component):
             annot.set_text(phase)
             annot.set_visible(True)
         subax.set_axis_off()
-        
 
-    
-            
-            
+
+
+
+
     def plot_event(self, event_name, config="local", azimuthal_projection=False, iteration_name = "raw", Phases=None, event_info=None, ax=None):
         """
         Plots information about one event on the map.
@@ -520,7 +520,7 @@ class VisualizationsComponent(Component):
 
         if Phases is None:
             Phases = [self.comm.project.config["download_settings"]["phase_of_interest"]]
-            
+
         if event_info is None and not self.comm.events.has_event(event_name):
             self.comm.events.update_cache()
             if not self.comm.events.has_event(event_name):
@@ -550,7 +550,7 @@ class VisualizationsComponent(Component):
                 stations = self.comm.query.get_all_stations_for_event_for_iteration(event_name, iteration_name)
         else:
             stations = self.comm.query.get_all_stations()
-            
+
         # Plot the stations if it has some. This will also plot raypaths.
         scatter_stations = visualization.plot_stations_for_event(
             map_object=map_object, station_dict=stations,
@@ -570,7 +570,7 @@ class VisualizationsComponent(Component):
         for station_name in stations:
             station_names.append(station_name)
 
-        def hover_stations(event):        
+        def hover_stations(event):
             vis = annot.get_visible()
             cont, ind = scatter_stations.contains(event)
             if cont:
@@ -588,7 +588,7 @@ class VisualizationsComponent(Component):
         fig.canvas.mpl_connect("button_press_event", hover_stations)
 
         # add beachball with arrival in subaxes
-        if config == "local":      
+        if config == "local":
             ax_sub = fig.add_axes([0.05, 0.6, 0.3, 0.25])
             self.comm.visualizations.plot_beachball_arrivals(event_info, stations, Phases=Phases, beachcolor="red", ax=ax_sub)
         return map_object
@@ -653,11 +653,11 @@ class VisualizationsComponent(Component):
             print("Saved picture at %s" % outfile)
 
 
-    def plot_raw_waveforms(self, event_name, components = ['E','N','Z'], 
+    def plot_raw_waveforms(self, event_name, components = ['E','N','Z'],
                            scaling = 0.5, Filter=False, freqmin=0.01, freqmax=0.1,
                            plot_arrival=True, Phase=None):
         """
-        Will plot raw seismic waveform gather with data stored in DATA/event_name/raw folder 
+        Will plot raw seismic waveform gather with data stored in DATA/event_name/raw folder
         that corresponds to preprocessing parameters of the iteration file
         Parameters
         ----------
@@ -666,7 +666,7 @@ class VisualizationsComponent(Component):
         components: list of str
             list of seismic components to plot
         Filter: Boolean, True or False
-            if True, will filter the waveforms 
+            if True, will filter the waveforms
         freqmin: float
             minimum corner frequency
         freqmax: float
@@ -674,13 +674,13 @@ class VisualizationsComponent(Component):
         plot_window: Boolean, True or False
             if True, will plot the time limits for the pase windowing as defined in the iteration file
         Phase: str
-            Name of the seismic phase to window. 
+            Name of the seismic phase to window.
             if None, will read the seismic phase of interest in the config file
 
         Raises
         ------
         ValueError
-            - if no seismic waveforms stored in raw folder 
+            - if no seismic waveforms stored in raw folder
             for one of the asked component
             - if no waveforms or the epicentral distance range is zero
 
@@ -688,7 +688,7 @@ class VisualizationsComponent(Component):
         -------
         None.
 
-        """  
+        """
         from lasif.visualization import plot_waveform_section
         from obspy.geodetics.base import locations2degrees
         from obspy.core import read, Stream
@@ -698,7 +698,7 @@ class VisualizationsComponent(Component):
 
         if Phase is None:
             Phase = self.comm.project.config["download_settings"]["phase_of_interest"]
-            
+
         # First check the given components
 
         # check the number of components
@@ -727,7 +727,7 @@ class VisualizationsComponent(Component):
                 titles.append('East')
             elif comp=='N':
                 titles.append('North')
-            else: 
+            else:
                 raise ValueError("Invalid data component '%s'. Component should be E, N, R, T or Z." %comp)
 
         # Get event and iteration infos
@@ -747,7 +747,7 @@ class VisualizationsComponent(Component):
 
         waveforms = self.comm.waveforms.get_metadata_raw(event_name)
         # select waveforms for requested components:
-        waveforms = [wav for wav in waveforms 
+        waveforms = [wav for wav in waveforms
                      if wav["channel"][-1] in components]
         if not waveforms:
             raise ValueError("No raw available waveforms for '%s'." %event_name)
@@ -761,7 +761,7 @@ class VisualizationsComponent(Component):
         for wav in waveforms:
             station = station_coordinates[wav["network"]+'.'+wav["station"]]
             wav["epicentral_distance"] = locations2degrees(
-                event["latitude"], event["longitude"], 
+                event["latitude"], event["longitude"],
                 station["latitude"],station["longitude"])
             if plot_arrival :
                 tts = earth_model.get_travel_times(source_depth_in_km=event["depth_in_km"],
@@ -782,7 +782,7 @@ class VisualizationsComponent(Component):
 
         # Plotting
         import matplotlib.pylab as plt
-        import matplotlib.gridspec as gridspec   
+        import matplotlib.gridspec as gridspec
         fig = plt.figure(figsize=(12, 8))
         spec = gridspec.GridSpec(ncols=ncomp, nrows=1, figure=fig)
         if Filter == "True":
@@ -806,7 +806,7 @@ class VisualizationsComponent(Component):
             st = Stream()
             for files, tt_arrival in zip(file_list, tt_arrival_times):
                 tr = read(files)
-                
+
                 if Filter == "True":
                     tr.detrend("linear")
                     tr.detrend("demean")
@@ -833,7 +833,7 @@ class VisualizationsComponent(Component):
         annot1 = ax1.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                               bbox=dict(boxstyle="round", fc="w"),
                               arrowprops=dict(arrowstyle="->"))
-        annot1.set_visible(False)            
+        annot1.set_visible(False)
 
 
         if ncomp>1:
@@ -849,7 +849,7 @@ class VisualizationsComponent(Component):
                 st = Stream()
                 for files, tt_arrival in zip(file_list, tt_arrival_times):
                     tr = read(files)
-                    
+
                     if Filter == "True":
                         tr.detrend("linear")
                         tr.detrend("demean")
@@ -873,7 +873,7 @@ class VisualizationsComponent(Component):
             annot2 = ax2.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                                   bbox=dict(boxstyle="round", fc="w"),
                                   arrowprops=dict(arrowstyle="->"))
-            annot2.set_visible(False) 
+            annot2.set_visible(False)
 
 
             if ncomp>2:
@@ -889,7 +889,7 @@ class VisualizationsComponent(Component):
                     st = Stream()
                     for files, tt_arrival in zip(file_list, tt_arrival_times):
                         tr = read(files)
-                        
+
                         if Filter == "True":
                             tr.detrend("linear")
                             tr.detrend("demean")
@@ -913,7 +913,7 @@ class VisualizationsComponent(Component):
                 annot3 = ax3.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                                       bbox=dict(boxstyle="round", fc="w"),
                                       arrowprops=dict(arrowstyle="->"))
-                annot3.set_visible(False) 
+                annot3.set_visible(False)
 
         def on_plot_hover(event):
             # Iterating over each data member plotted
@@ -945,11 +945,11 @@ class VisualizationsComponent(Component):
                         annot3.set_visible(True)
                         fig.canvas.draw_idle()
 
-        fig.canvas.mpl_connect('button_press_event', on_plot_hover) 
+        fig.canvas.mpl_connect('button_press_event', on_plot_hover)
 
 
 
-    def plot_preprocessed_waveforms(self, event_name, iteration_name, components = ['E','N','Z'], 
+    def plot_preprocessed_waveforms(self, event_name, iteration_name, components = ['E','N','Z'],
                                     scaling = 0.5, plot_raw=False, plot_window=True, Phase=None):
         """
         Will plot seismic waveform gather with data stored in DATA/event_name/preprocessed folder
@@ -968,7 +968,7 @@ class VisualizationsComponent(Component):
         plot_window: Boolean, True or False
             if True, will plot the time limits for the pase windowing as defined in the iteration file
         Phase: str
-            Name of the seismic phase to window. 
+            Name of the seismic phase to window.
             if None, will read the phase of interest in the config file
 
         Raises
@@ -992,7 +992,7 @@ class VisualizationsComponent(Component):
 
         if Phase is None:
             Phase = self.comm.project.config["download_settings"]["phase_of_interest"]
-            
+
         # First check the given components
 
         # check the number of components
@@ -1025,7 +1025,7 @@ class VisualizationsComponent(Component):
                 titles.append('Radial')
             elif comp == 'T':
                 titles.append('Transverse')
-            else: 
+            else:
                 raise ValueError("Invalid data component '%s'. Component should be E, N, R, T or Z." %comp)
 
         # Get event and iteration infos
@@ -1038,7 +1038,7 @@ class VisualizationsComponent(Component):
         station_coordinates = self.comm.query.get_all_stations_for_event(event_name)
         waveforms = self.comm.waveforms.get_metadata_processed(event_name, processing_tag)
         # select waveforms for requested components:
-        waveforms = [wav for wav in waveforms 
+        waveforms = [wav for wav in waveforms
                      if wav["channel"][-1] in components]
         # Group by station name.
 
@@ -1058,7 +1058,7 @@ class VisualizationsComponent(Component):
         for wav in waveforms:
             station = station_coordinates[wav["network"]+'.'+wav["station"]]
             wav["epicentral_distance"] = locations2degrees(
-                event["latitude"], event["longitude"], 
+                event["latitude"], event["longitude"],
                 station["latitude"],station["longitude"])
             if plot_window :
                 tts = earth_model.get_travel_times(source_depth_in_km=event["depth_in_km"],
@@ -1072,7 +1072,7 @@ class VisualizationsComponent(Component):
             for raw in raws:
                 station = station_coordinates[wav["network"]+'.'+wav["station"]]
                 raw["epicentral_distance"] = locations2degrees(
-                    event["latitude"], event["longitude"], 
+                    event["latitude"], event["longitude"],
                     station["latitude"],station["longitude"])
 
         if plot_raw == "True" and raws:
@@ -1155,7 +1155,7 @@ class VisualizationsComponent(Component):
                             a=12,
                             npts=pparam["npts"])
                         st_raw += tr
-                    plot_waveform_section(ax1,st_raw, offset_raw, reftime = event["origin_time"], scale=scaling, 
+                    plot_waveform_section(ax1,st_raw, offset_raw, reftime = event["origin_time"], scale=scaling,
                                           colors=(.14, .59, .78))
 
             plot_waveform_section(ax1,st, offset, reftime = event["origin_time"], scale=scaling)
@@ -1172,7 +1172,7 @@ class VisualizationsComponent(Component):
         annot1 = ax1.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                               bbox=dict(boxstyle="round", fc="w"),
                               arrowprops=dict(arrowstyle="->"))
-        annot1.set_visible(False)            
+        annot1.set_visible(False)
 
 
         if ncomp>1:
@@ -1218,7 +1218,7 @@ class VisualizationsComponent(Component):
                                 method="lanczos", starttime=event["origin_time"], window="blackman", a=12,
                                 npts=pparam["npts"])
                             st_raw += tr
-                        plot_waveform_section(ax2,st_raw, offset_raw, reftime = event["origin_time"], scale=scaling, 
+                        plot_waveform_section(ax2,st_raw, offset_raw, reftime = event["origin_time"], scale=scaling,
                                               colors=(.14, .59, .78))
 
                 plot_waveform_section(ax2,st, offset, reftime = event["origin_time"], scale=scaling)
@@ -1233,7 +1233,7 @@ class VisualizationsComponent(Component):
             annot2 = ax2.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                                   bbox=dict(boxstyle="round", fc="w"),
                                   arrowprops=dict(arrowstyle="->"))
-            annot2.set_visible(False) 
+            annot2.set_visible(False)
 
 
             if ncomp>2:
@@ -1279,7 +1279,7 @@ class VisualizationsComponent(Component):
                                     method="lanczos", starttime=event["origin_time"], window="blackman", a=12,
                                     npts=pparam["npts"])
                                 st_raw += tr
-                            plot_waveform_section(ax3,st_raw, offset_raw, reftime = event["origin_time"], scale=scaling, 
+                            plot_waveform_section(ax3,st_raw, offset_raw, reftime = event["origin_time"], scale=scaling,
                                                   colors=(.14, .59, .78))
 
                     plot_waveform_section(ax3,st, offset, reftime = event["origin_time"], scale=scaling)
@@ -1294,289 +1294,7 @@ class VisualizationsComponent(Component):
                 annot3 = ax3.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                                       bbox=dict(boxstyle="round", fc="w"),
                                       arrowprops=dict(arrowstyle="->"))
-                annot3.set_visible(False) 
-
-        def on_plot_hover(event):
-            # Iterating over each data member plotted
-            if event.inaxes == ax1:
-                xpos = ax1.get_xlim()[0]
-                for curve in ax1.get_lines():
-                    # Searching which data member corresponds to current mouse position
-                    if curve.contains(event)[0]:
-                        annot1.xy = (xpos,curve.get_data()[1][0])
-                        annot1.set_text(curve.get_label())
-                        annot1.set_visible(True)
-                        fig.canvas.draw_idle()
-            elif len(fig.axes)>1 and event.inaxes == ax2:
-                xpos = ax2.get_xlim()[0]
-                for curve in ax2.get_lines():
-                    # Searching which data member corresponds to current mouse position
-                    if curve.contains(event)[0]:
-                        annot2.xy = (xpos,curve.get_data()[1][0])
-                        annot2.set_text(curve.get_label())
-                        annot2.set_visible(True)
-                        fig.canvas.draw_idle()
-            elif len(fig.axes)>2 and event.inaxes == ax3:
-                xpos = ax3.get_xlim()[0]
-                for curve in ax3.get_lines():
-                    # Searching which data member corresponds to current mouse position
-                    if curve.contains(event)[0]:
-                        annot3.xy = (xpos,curve.get_data()[1][0])
-                        annot3.set_text(curve.get_label())
-                        annot3.set_visible(True)
-                        fig.canvas.draw_idle()
-
-        fig.canvas.mpl_connect('button_press_event', on_plot_hover) 
-
-
-    def plot_synthetic_waveforms(self, event_name, iteration_name, components = ['E','N','Z'], 
-                                 scaling = 0.5, plot_window=True, Phase=None):
-        """
-        Will plot seismic waveform gather with synthetics and preprocessed data
-        that corresponds to preprocessing parameters of the iteration file
-        Parameters
-        ----------
-        event_name : str
-            name of the event to plot
-        iteration_name: int
-            name of the iteration
-        components: list of str
-            list of seismic components to plot
-        plot_window: Boolean, True or False
-            if True, will plot the time limits for the pase windowing as defined in the iteration file
-        Phase: str
-            Name of the seismic phase to window. 
-            if None, will read te phase of interest in the config file
-
-
-        Raises
-        ------
-        ValueError
-            - if no seismic waveforms stored in the synthetic folder
-            for one of the asked component
-            - if no waveforms or the epicentral distance range is zero
-
-        Returns
-        -------
-        None.
-
-        """
-        from lasif.visualization import plot_waveform_section
-        from obspy.geodetics.base import locations2degrees
-        from obspy.core import read, Stream
-        if plot_window:
-            from obspy.taup import TauPyModel
-            earth_model = TauPyModel("ak135")
-
-        if Phase is None:
-            Phase = self.comm.project.config["download_settings"]["phase_of_interest"]
-            
-        # First check the given components
-
-        # check the number of components
-        ncomp = len(components)
-        if ncomp > 3:
-            msg = ("There are more than 3 components given")
-            raise LASIFError(msg)
-
-        # sort components so will plot Z data first
-        if 'Z' in components:
-            components.sort(reverse=False)
-            components = np.roll(np.array(components),1).tolist()
-
-        # check data component and initiate titles for each component plot
-        titles = []
-        for comp in components:
-            if comp == 'Z':
-                titles.append('Vertical')
-            elif comp == 'E':
-                titles.append('East')
-            elif comp == 'N':
-                titles.append('North')
-            elif comp == 'R':
-                titles.append('Radial')
-            elif comp == 'T':
-                titles.append('Transverse')
-            else: 
-                raise ValueError("Invalid data component '%s'. Component should be E, N, R, T or Z." %comp)
-
-        # Get event and iteration infos
-        event = self.comm.events.get(event_name)
-        iteration = self.comm.iterations.get(iteration_name)
-        pparam = iteration.get_process_params()
-        processing_tag = iteration.processing_tag
-
-        # Get station and waveform infos
-        station_coordinates = self.comm.query.get_all_stations_for_event(event_name)
-        waveforms = self.comm.waveforms.get_metadata_processed(event_name, processing_tag)
-        synthetics = self.comm.waveforms.get_metadata_synthetic(event_name, iteration_name)
-        # select waveforms for requested components:
-        waveforms = [wav for wav in waveforms 
-                     if wav["channel"][-1] in components]
-        synthetics = [syn for syn in synthetics 
-                      if syn["channel"][-1] in components]
-        # Group by station name.
-
-        def func(x):
-            return ".".join(x["channel_id"].split(".")[:2])
-        waveforms.sort(key=func)
-        synthetics.sort(key=func)
-
-
-        # First step is to calculate all epicentral distances.   
-        #for (wav,syn) in zip(waveforms, synthetics):
-        for wav in waveforms:
-            station = station_coordinates[wav["network"]+'.'+wav["station"]]
-            wav["epicentral_distance"] = locations2degrees(
-                event["latitude"], event["longitude"], 
-                station["latitude"],station["longitude"])
-            if plot_window :
-                tts = earth_model.get_travel_times(source_depth_in_km=event["depth_in_km"],
-                                                   distance_in_degree=wav["epicentral_distance"],
-                                                   phase_list=[Phase])
-                if len(tts):
-                    wav["tt_arrival_time"]  = tts[0].time
-                else:
-                    wav["tt_arrival_time"] = np.nan
-
-        for syn in synthetics:
-            syn["epicentral_distance"] = [wav["epicentral_distance"]
-                                          for wav in waveforms 
-                                          if syn["station"] in wav["station"]][0]
-            #syn["epicentral_distance"] = wav["epicentral_distance"].copy()
-        min_epicentral_distance = math.ceil(min(
-            _i["epicentral_distance"] for _i in waveforms))
-        max_epicentral_distance = math.ceil(max(
-            _i["epicentral_distance"] for _i in waveforms))
-        epicentral_range = max_epicentral_distance - min_epicentral_distance
-        if epicentral_range == 0:
-            raise ValueError
-
-        # Plotting
-        import matplotlib.pylab as plt
-        import matplotlib.gridspec as gridspec
-        fig = plt.figure(figsize=(12, 8))
-        spec = gridspec.GridSpec(ncols=ncomp, nrows=1, figure=fig)
-        plt.suptitle(event_name)
-
-        # subplot on each component: read data files + plotting
-        sub = 0
-        ax1 = fig.add_subplot(spec[0, sub])
-        comp = components[sub]
-        file_list = [syn["filename"] for syn in synthetics if comp in syn["channel"]]
-        if len(file_list)==0:
-            raise LASIFError("No synthetics data available for component '%s'" %comp)        
-        offset = [syn["epicentral_distance"] for syn in synthetics if comp in syn["channel"]]
-        tt_arrival_times = [wav["tt_arrival_time"] for wav in waveforms if comp in wav["channel"]]
-        st = Stream()
-        #corrected_arrival_times = []
-        for files, tt_arrival in zip(file_list, tt_arrival_times):
-            tr = read(files)
-            #delta = event["origin_time"].datetime - tr[0].stats.starttime.datetime
-            #corrected_arrival_times.append(tt_arrival + delta.total_seconds())
-            st += tr     
-        file_list_wav = [wav["filename"] for wav in waveforms if comp in wav["channel"]]
-        if len(file_list_wav)==0:
-            raise LASIFError("No processed data available for component '%s'" %comp)
-        offset_wav = [wav["epicentral_distance"] for wav in waveforms if comp in wav["channel"]]
-        st_wav = Stream()
-        for files in file_list_wav:
-            st_wav += read(files)
-        plot_waveform_section(ax1,st, offset, reftime = event["origin_time"], scale=scaling,colors='r')
-        plot_waveform_section(ax1,st_wav, offset_wav, reftime = event["origin_time"], scale=scaling, 
-                              colors='k')  
-        if plot_window:
-            for arrival, dist in zip(tt_arrival_times, offset_wav):
-                plt.plot(arrival-pparam["seconds_prior_arrival"], dist,'b.',markersize=2)
-                plt.plot(arrival-pparam["seconds_prior_arrival"]+pparam["window_length_in_sec"], dist,'b.', markersize=2)
-
-        ax1.set_ylim(min_epicentral_distance-0.1*epicentral_range,
-                     max_epicentral_distance+0.1*epicentral_range)
-        ax1.set_title(titles[sub])
-        ax1.set_xlabel('Time since event (s)')
-        ax1.set_ylabel('Epicentral distance (degree)')
-        annot1 = ax1.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
-                              bbox=dict(boxstyle="round", fc="w"),
-                              arrowprops=dict(arrowstyle="->"))
-        annot1.set_visible(False)
-
-        if ncomp>1:
-            sub += 1
-            ax2 = fig.add_subplot(spec[0, sub], sharex=ax1, sharey=ax1)
-            comp = components[sub]
-            file_list = [syn["filename"] for syn in synthetics if comp in syn["channel"]]
-            if len(file_list)==0:
-                raise LASIFError("No synthetics data available for component '%s'" %comp)        
-            offset = [syn["epicentral_distance"] for syn in synthetics if comp in syn["channel"]]
-            st = Stream()
-            #corrected_arrival_times = []
-            for files, tt_arrival in zip(file_list, tt_arrival_times):
-                tr = read(files)
-                #delta = event["origin_time"].datetime - tr[0].stats.starttime.datetime
-                #corrected_arrival_times.append(tt_arrival + delta.total_seconds())
-                st += tr
-            file_list_wav = [wav["filename"] for wav in waveforms if comp in wav["channel"]]
-            if len(file_list_wav)==0:
-                raise LASIFError("No processed data available for component '%s'" %comp)
-            offset_wav = [wav["epicentral_distance"] for wav in waveforms if comp in wav["channel"]]
-            tt_arrival_times = [wav["tt_arrival_time"] for wav in waveforms if comp in wav["channel"]]
-            st_wav = Stream()
-            for files in file_list_wav:
-                st_wav += read(files)
-            plot_waveform_section(ax2,st, offset, reftime = event["origin_time"], scale=scaling,colors='r')
-            plot_waveform_section(ax2,st_wav, offset_wav, reftime = event["origin_time"], scale=scaling, 
-                                  colors='k')
-            if plot_window:
-                for arrival, dist in zip(tt_arrival_times, offset_wav):
-                    plt.plot(arrival-pparam["seconds_prior_arrival"], dist,'b.',markersize=2)
-                    plt.plot(arrival-pparam["seconds_prior_arrival"]+pparam["window_length_in_sec"], dist,'b.', markersize=2)
-
-            #ax2.set_ylim(min_epicentral_distance, max_epicentral_distance)
-            ax2.set_title(titles[sub])
-            ax2.set_xlabel('Time since event (s)')
-            annot2 = ax2.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
-                                  bbox=dict(boxstyle="round", fc="w"),
-                                  arrowprops=dict(arrowstyle="->"))
-            annot2.set_visible(False) 
-
-            if ncomp>2:
-                sub += 1
-                ax3 = fig.add_subplot(spec[0, sub], sharex=ax1, sharey=ax1)
-                comp = components[sub]
-                file_list = [syn["filename"] for syn in synthetics if comp in syn["channel"]]
-                if len(file_list)==0:
-                    raise LASIFError("No synthetics data available for component '%s'" %comp)        
-                offset = [syn["epicentral_distance"] for syn in synthetics if comp in syn["channel"]]
-                tt_arrival_times = [wav["tt_arrival_time"] for wav in waveforms if comp in wav["channel"]]
-                st = Stream()
-                #corrected_arrival_times = []
-                for files, tt_arrival in zip(file_list, tt_arrival_times):
-                    tr = read(files)
-                    #delta = event["origin_time"].datetime - tr[0].stats.starttime.datetime
-                    #corrected_arrival_times.append(tt_arrival + delta.total_seconds())
-                    st += tr     
-                file_list_wav = [wav["filename"] for wav in waveforms if comp in wav["channel"]]
-                if len(file_list_wav)==0:
-                    raise LASIFError("No processed data available for component '%s'" %comp)
-                offset_wav = [wav["epicentral_distance"] for wav in waveforms if comp in wav["channel"]]
-                st_wav = Stream()
-                for files in file_list_wav:
-                    st_wav += read(files)
-                plot_waveform_section(ax3,st, offset, reftime = event["origin_time"], scale=scaling,colors='r')
-                plot_waveform_section(ax3,st_wav, offset_wav, reftime = event["origin_time"], scale=scaling, 
-                                      colors='k')
-                if plot_window:
-                    for arrival, dist in zip(tt_arrival_times, offset_wav):
-                        plt.plot(arrival-pparam["seconds_prior_arrival"], dist,'b.',markersize=2)
-                        plt.plot(arrival-pparam["seconds_prior_arrival"]+pparam["window_length_in_sec"], dist,'b.', markersize=2)
-
-                #ax3.set_ylim(min_epicentral_distance, max_epicentral_distance)
-                ax3.set_title(titles[sub])
-                ax3.set_xlabel('Time since event (s)')
-                annot3 = ax3.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
-                                      bbox=dict(boxstyle="round", fc="w"),
-                                      arrowprops=dict(arrowstyle="->"))
-                annot3.set_visible(False) 
+                annot3.set_visible(False)
 
         def on_plot_hover(event):
             # Iterating over each data member plotted
@@ -1611,7 +1329,289 @@ class VisualizationsComponent(Component):
         fig.canvas.mpl_connect('button_press_event', on_plot_hover)
 
 
-    def plot_synthetic_from_stf(self, event_name, iteration_name, components = ['E','N','Z'], 
+    def plot_synthetic_waveforms(self, event_name, iteration_name, components = ['E','N','Z'],
+                                 scaling = 0.5, plot_window=True, Phase=None):
+        """
+        Will plot seismic waveform gather with synthetics and preprocessed data
+        that corresponds to preprocessing parameters of the iteration file
+        Parameters
+        ----------
+        event_name : str
+            name of the event to plot
+        iteration_name: int
+            name of the iteration
+        components: list of str
+            list of seismic components to plot
+        plot_window: Boolean, True or False
+            if True, will plot the time limits for the pase windowing as defined in the iteration file
+        Phase: str
+            Name of the seismic phase to window.
+            if None, will read te phase of interest in the config file
+
+
+        Raises
+        ------
+        ValueError
+            - if no seismic waveforms stored in the synthetic folder
+            for one of the asked component
+            - if no waveforms or the epicentral distance range is zero
+
+        Returns
+        -------
+        None.
+
+        """
+        from lasif.visualization import plot_waveform_section
+        from obspy.geodetics.base import locations2degrees
+        from obspy.core import read, Stream
+        if plot_window:
+            from obspy.taup import TauPyModel
+            earth_model = TauPyModel("ak135")
+
+        if Phase is None:
+            Phase = self.comm.project.config["download_settings"]["phase_of_interest"]
+
+        # First check the given components
+
+        # check the number of components
+        ncomp = len(components)
+        if ncomp > 3:
+            msg = ("There are more than 3 components given")
+            raise LASIFError(msg)
+
+        # sort components so will plot Z data first
+        if 'Z' in components:
+            components.sort(reverse=False)
+            components = np.roll(np.array(components),1).tolist()
+
+        # check data component and initiate titles for each component plot
+        titles = []
+        for comp in components:
+            if comp == 'Z':
+                titles.append('Vertical')
+            elif comp == 'E':
+                titles.append('East')
+            elif comp == 'N':
+                titles.append('North')
+            elif comp == 'R':
+                titles.append('Radial')
+            elif comp == 'T':
+                titles.append('Transverse')
+            else:
+                raise ValueError("Invalid data component '%s'. Component should be E, N, R, T or Z." %comp)
+
+        # Get event and iteration infos
+        event = self.comm.events.get(event_name)
+        iteration = self.comm.iterations.get(iteration_name)
+        pparam = iteration.get_process_params()
+        processing_tag = iteration.processing_tag
+
+        # Get station and waveform infos
+        station_coordinates = self.comm.query.get_all_stations_for_event(event_name)
+        waveforms = self.comm.waveforms.get_metadata_processed(event_name, processing_tag)
+        synthetics = self.comm.waveforms.get_metadata_synthetic(event_name, iteration_name)
+        # select waveforms for requested components:
+        waveforms = [wav for wav in waveforms
+                     if wav["channel"][-1] in components]
+        synthetics = [syn for syn in synthetics
+                      if syn["channel"][-1] in components]
+        # Group by station name.
+
+        def func(x):
+            return ".".join(x["channel_id"].split(".")[:2])
+        waveforms.sort(key=func)
+        synthetics.sort(key=func)
+
+
+        # First step is to calculate all epicentral distances.
+        #for (wav,syn) in zip(waveforms, synthetics):
+        for wav in waveforms:
+            station = station_coordinates[wav["network"]+'.'+wav["station"]]
+            wav["epicentral_distance"] = locations2degrees(
+                event["latitude"], event["longitude"],
+                station["latitude"],station["longitude"])
+            if plot_window :
+                tts = earth_model.get_travel_times(source_depth_in_km=event["depth_in_km"],
+                                                   distance_in_degree=wav["epicentral_distance"],
+                                                   phase_list=[Phase])
+                if len(tts):
+                    wav["tt_arrival_time"]  = tts[0].time
+                else:
+                    wav["tt_arrival_time"] = np.nan
+
+        for syn in synthetics:
+            syn["epicentral_distance"] = [wav["epicentral_distance"]
+                                          for wav in waveforms
+                                          if syn["station"] in wav["station"]][0]
+            #syn["epicentral_distance"] = wav["epicentral_distance"].copy()
+        min_epicentral_distance = math.ceil(min(
+            _i["epicentral_distance"] for _i in waveforms))
+        max_epicentral_distance = math.ceil(max(
+            _i["epicentral_distance"] for _i in waveforms))
+        epicentral_range = max_epicentral_distance - min_epicentral_distance
+        if epicentral_range == 0:
+            raise ValueError
+
+        # Plotting
+        import matplotlib.pylab as plt
+        import matplotlib.gridspec as gridspec
+        fig = plt.figure(figsize=(12, 8))
+        spec = gridspec.GridSpec(ncols=ncomp, nrows=1, figure=fig)
+        plt.suptitle(event_name)
+
+        # subplot on each component: read data files + plotting
+        sub = 0
+        ax1 = fig.add_subplot(spec[0, sub])
+        comp = components[sub]
+        file_list = [syn["filename"] for syn in synthetics if comp in syn["channel"]]
+        if len(file_list)==0:
+            raise LASIFError("No synthetics data available for component '%s'" %comp)
+        offset = [syn["epicentral_distance"] for syn in synthetics if comp in syn["channel"]]
+        tt_arrival_times = [wav["tt_arrival_time"] for wav in waveforms if comp in wav["channel"]]
+        st = Stream()
+        #corrected_arrival_times = []
+        for files, tt_arrival in zip(file_list, tt_arrival_times):
+            tr = read(files)
+            #delta = event["origin_time"].datetime - tr[0].stats.starttime.datetime
+            #corrected_arrival_times.append(tt_arrival + delta.total_seconds())
+            st += tr
+        file_list_wav = [wav["filename"] for wav in waveforms if comp in wav["channel"]]
+        if len(file_list_wav)==0:
+            raise LASIFError("No processed data available for component '%s'" %comp)
+        offset_wav = [wav["epicentral_distance"] for wav in waveforms if comp in wav["channel"]]
+        st_wav = Stream()
+        for files in file_list_wav:
+            st_wav += read(files)
+        plot_waveform_section(ax1,st, offset, reftime = event["origin_time"], scale=scaling,colors='r')
+        plot_waveform_section(ax1,st_wav, offset_wav, reftime = event["origin_time"], scale=scaling,
+                              colors='k')
+        if plot_window:
+            for arrival, dist in zip(tt_arrival_times, offset_wav):
+                plt.plot(arrival-pparam["seconds_prior_arrival"], dist,'b.',markersize=2)
+                plt.plot(arrival-pparam["seconds_prior_arrival"]+pparam["window_length_in_sec"], dist,'b.', markersize=2)
+
+        ax1.set_ylim(min_epicentral_distance-0.1*epicentral_range,
+                     max_epicentral_distance+0.1*epicentral_range)
+        ax1.set_title(titles[sub])
+        ax1.set_xlabel('Time since event (s)')
+        ax1.set_ylabel('Epicentral distance (degree)')
+        annot1 = ax1.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
+                              bbox=dict(boxstyle="round", fc="w"),
+                              arrowprops=dict(arrowstyle="->"))
+        annot1.set_visible(False)
+
+        if ncomp>1:
+            sub += 1
+            ax2 = fig.add_subplot(spec[0, sub], sharex=ax1, sharey=ax1)
+            comp = components[sub]
+            file_list = [syn["filename"] for syn in synthetics if comp in syn["channel"]]
+            if len(file_list)==0:
+                raise LASIFError("No synthetics data available for component '%s'" %comp)
+            offset = [syn["epicentral_distance"] for syn in synthetics if comp in syn["channel"]]
+            st = Stream()
+            #corrected_arrival_times = []
+            for files, tt_arrival in zip(file_list, tt_arrival_times):
+                tr = read(files)
+                #delta = event["origin_time"].datetime - tr[0].stats.starttime.datetime
+                #corrected_arrival_times.append(tt_arrival + delta.total_seconds())
+                st += tr
+            file_list_wav = [wav["filename"] for wav in waveforms if comp in wav["channel"]]
+            if len(file_list_wav)==0:
+                raise LASIFError("No processed data available for component '%s'" %comp)
+            offset_wav = [wav["epicentral_distance"] for wav in waveforms if comp in wav["channel"]]
+            tt_arrival_times = [wav["tt_arrival_time"] for wav in waveforms if comp in wav["channel"]]
+            st_wav = Stream()
+            for files in file_list_wav:
+                st_wav += read(files)
+            plot_waveform_section(ax2,st, offset, reftime = event["origin_time"], scale=scaling,colors='r')
+            plot_waveform_section(ax2,st_wav, offset_wav, reftime = event["origin_time"], scale=scaling,
+                                  colors='k')
+            if plot_window:
+                for arrival, dist in zip(tt_arrival_times, offset_wav):
+                    plt.plot(arrival-pparam["seconds_prior_arrival"], dist,'b.',markersize=2)
+                    plt.plot(arrival-pparam["seconds_prior_arrival"]+pparam["window_length_in_sec"], dist,'b.', markersize=2)
+
+            #ax2.set_ylim(min_epicentral_distance, max_epicentral_distance)
+            ax2.set_title(titles[sub])
+            ax2.set_xlabel('Time since event (s)')
+            annot2 = ax2.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
+                                  bbox=dict(boxstyle="round", fc="w"),
+                                  arrowprops=dict(arrowstyle="->"))
+            annot2.set_visible(False)
+
+            if ncomp>2:
+                sub += 1
+                ax3 = fig.add_subplot(spec[0, sub], sharex=ax1, sharey=ax1)
+                comp = components[sub]
+                file_list = [syn["filename"] for syn in synthetics if comp in syn["channel"]]
+                if len(file_list)==0:
+                    raise LASIFError("No synthetics data available for component '%s'" %comp)
+                offset = [syn["epicentral_distance"] for syn in synthetics if comp in syn["channel"]]
+                tt_arrival_times = [wav["tt_arrival_time"] for wav in waveforms if comp in wav["channel"]]
+                st = Stream()
+                #corrected_arrival_times = []
+                for files, tt_arrival in zip(file_list, tt_arrival_times):
+                    tr = read(files)
+                    #delta = event["origin_time"].datetime - tr[0].stats.starttime.datetime
+                    #corrected_arrival_times.append(tt_arrival + delta.total_seconds())
+                    st += tr
+                file_list_wav = [wav["filename"] for wav in waveforms if comp in wav["channel"]]
+                if len(file_list_wav)==0:
+                    raise LASIFError("No processed data available for component '%s'" %comp)
+                offset_wav = [wav["epicentral_distance"] for wav in waveforms if comp in wav["channel"]]
+                st_wav = Stream()
+                for files in file_list_wav:
+                    st_wav += read(files)
+                plot_waveform_section(ax3,st, offset, reftime = event["origin_time"], scale=scaling,colors='r')
+                plot_waveform_section(ax3,st_wav, offset_wav, reftime = event["origin_time"], scale=scaling,
+                                      colors='k')
+                if plot_window:
+                    for arrival, dist in zip(tt_arrival_times, offset_wav):
+                        plt.plot(arrival-pparam["seconds_prior_arrival"], dist,'b.',markersize=2)
+                        plt.plot(arrival-pparam["seconds_prior_arrival"]+pparam["window_length_in_sec"], dist,'b.', markersize=2)
+
+                #ax3.set_ylim(min_epicentral_distance, max_epicentral_distance)
+                ax3.set_title(titles[sub])
+                ax3.set_xlabel('Time since event (s)')
+                annot3 = ax3.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
+                                      bbox=dict(boxstyle="round", fc="w"),
+                                      arrowprops=dict(arrowstyle="->"))
+                annot3.set_visible(False)
+
+        def on_plot_hover(event):
+            # Iterating over each data member plotted
+            if event.inaxes == ax1:
+                xpos = ax1.get_xlim()[0]
+                for curve in ax1.get_lines():
+                    # Searching which data member corresponds to current mouse position
+                    if curve.contains(event)[0]:
+                        annot1.xy = (xpos,curve.get_data()[1][0])
+                        annot1.set_text(curve.get_label())
+                        annot1.set_visible(True)
+                        fig.canvas.draw_idle()
+            elif len(fig.axes)>1 and event.inaxes == ax2:
+                xpos = ax2.get_xlim()[0]
+                for curve in ax2.get_lines():
+                    # Searching which data member corresponds to current mouse position
+                    if curve.contains(event)[0]:
+                        annot2.xy = (xpos,curve.get_data()[1][0])
+                        annot2.set_text(curve.get_label())
+                        annot2.set_visible(True)
+                        fig.canvas.draw_idle()
+            elif len(fig.axes)>2 and event.inaxes == ax3:
+                xpos = ax3.get_xlim()[0]
+                for curve in ax3.get_lines():
+                    # Searching which data member corresponds to current mouse position
+                    if curve.contains(event)[0]:
+                        annot3.xy = (xpos,curve.get_data()[1][0])
+                        annot3.set_text(curve.get_label())
+                        annot3.set_visible(True)
+                        fig.canvas.draw_idle()
+
+        fig.canvas.mpl_connect('button_press_event', on_plot_hover)
+
+
+    def plot_synthetic_from_stf(self, event_name, iteration_name, components = ['E','N','Z'],
                                 scaling = 0.5, plot_raw = True, plot_window=True, Phase='P'):
         """
         Will plot seismic waveform gather with synthetics computed prior and after the stf deconvolution
@@ -1626,7 +1626,7 @@ class VisualizationsComponent(Component):
         plot_window: Boolean, True or False
             if True, will plot the time limits for the pase windowing as defined in the iteration file
         Phase: str
-            Name of the seismic phase to window. 
+            Name of the seismic phase to window.
 
 
         Raises
@@ -1686,7 +1686,7 @@ class VisualizationsComponent(Component):
                 titles.append('Radial')
             elif comp == 'T':
                 titles.append('Transverse')
-            else: 
+            else:
                 raise ValueError("Invalid data component '%s'. Component should be E, N, R, T or Z." %comp)
 
         # Get event and iteration infos
@@ -1700,9 +1700,9 @@ class VisualizationsComponent(Component):
         waveforms = self.comm.waveforms.get_metadata_processed(event_name, processing_tag)
         greens = self.comm.waveforms.get_metadata_synthetic(event_name, iteration_name)
         # select waveforms for requested components:
-        waveforms = [wav for wav in waveforms 
+        waveforms = [wav for wav in waveforms
                      if wav["channel"][-1] in components]
-        greens = [green for green in greens 
+        greens = [green for green in greens
                   if green["channel"][-1] in components]
         # Group by station name.
 
@@ -1713,11 +1713,11 @@ class VisualizationsComponent(Component):
 
 
         # First step is to calculate all epicentral distances.
-        stream_syn = Stream()  
+        stream_syn = Stream()
         for wav in waveforms:
             station = station_coordinates[wav["network"]+'.'+wav["station"]]
             wav["epicentral_distance"] = locations2degrees(
-                event["latitude"], event["longitude"], 
+                event["latitude"], event["longitude"],
                 station["latitude"],station["longitude"])
             if plot_window :
                 tts = earth_model.get_travel_times(source_depth_in_km=event["depth_in_km"],
@@ -1736,7 +1736,7 @@ class VisualizationsComponent(Component):
 
         for syn in greens:
             syn["epicentral_distance"] = [wav["epicentral_distance"]
-                                          for wav in waveforms 
+                                          for wav in waveforms
                                           if syn["station"] in wav["station"]][0]
         min_epicentral_distance = math.ceil(min(
             _i["epicentral_distance"] for _i in waveforms))
@@ -1763,26 +1763,26 @@ class VisualizationsComponent(Component):
         stf = \
             self.comm.waveforms.get_waveform_stf(event_name, iteration_name, component = 'Z')
         if not stf:
-            raise LASIFError("No stf data available for component '%s'" %comp)   
+            raise LASIFError("No stf data available for component '%s'" %comp)
         starttime = stf[0].stats.starttime
         endtime = stf[0].stats.endtime
 
         file_list_green = [syn["filename"] for syn in greens if comp in syn["channel"]]
         if len(file_list_green)==0:
-            raise LASIFError("No synthetics data available for component '%s'" %comp)        
+            raise LASIFError("No synthetics data available for component '%s'" %comp)
         offset_green = [syn["epicentral_distance"] for syn in greens if comp in syn["channel"]]
         st_green = Stream()
         for files, offset in zip(file_list_green, offset_green):
             tr = read(files)
             tr.trim(starttime,endtime)
-            st_green += tr  
+            st_green += tr
         st_syn = stream_syn.select(component = comp)
         offset_syn = []
         for tr in st_syn:
             net = tr.stats.network
             stat = tr.stats.station
             offset_syn.append([wav["epicentral_distance"]
-                               for wav in waveforms 
+                               for wav in waveforms
                                if net in wav["channel_id"].split('.')[0]
                                and stat in wav["channel_id"].split('.')[1]][0])
 
@@ -1801,9 +1801,9 @@ class VisualizationsComponent(Component):
 
         if plot_raw == "True":
             plot_waveform_section(ax1,st_green, offset_green, scale=scaling,colors='r')
-        plot_waveform_section(ax1,st_wav, offset_wav, scale=scaling, 
+        plot_waveform_section(ax1,st_wav, offset_wav, scale=scaling,
                               colors='k', lw =2)
-        plot_waveform_section(ax1,st_syn, offset_syn, scale=scaling, 
+        plot_waveform_section(ax1,st_syn, offset_syn, scale=scaling,
                               colors='b')
         if plot_window:
             for arrival, dist in zip(tt_arrival_times, offset_wav):
@@ -1840,7 +1840,7 @@ class VisualizationsComponent(Component):
 
             file_list_green = [syn["filename"] for syn in greens if comp in syn["channel"]]
             if len(file_list_green)==0:
-                raise LASIFError("No synthetics data available for component '%s'" %comp)        
+                raise LASIFError("No synthetics data available for component '%s'" %comp)
             offset_green = [syn["epicentral_distance"] for syn in greens if comp in syn["channel"]]
             st_green = Stream()
             for files in file_list_green:
@@ -1864,14 +1864,14 @@ class VisualizationsComponent(Component):
                 net = tr.stats.network
                 stat = tr.stats.station
                 offset_syn.append([wav["epicentral_distance"]
-                                   for wav in waveforms 
+                                   for wav in waveforms
                                    if net in wav["channel_id"].split('.')[0]
                                    and stat in wav["channel_id"].split('.')[1]][0])
             if plot_raw == "True":
                 plot_waveform_section(ax2,st_green, offset_green, scale=scaling, colors='r')
-            plot_waveform_section(ax2,st_wav, offset_wav, scale=scaling, 
+            plot_waveform_section(ax2,st_wav, offset_wav, scale=scaling,
                                   colors='k', lw =2)
-            plot_waveform_section(ax2,st_syn, offset_syn, scale=scaling, 
+            plot_waveform_section(ax2,st_syn, offset_syn, scale=scaling,
                                   colors='b')
             if plot_window:
                 for arrival, dist in zip(tt_arrival_times, offset_wav):
@@ -1885,7 +1885,7 @@ class VisualizationsComponent(Component):
             annot2 = ax2.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                                   bbox=dict(boxstyle="round", fc="w"),
                                   arrowprops=dict(arrowstyle="->"))
-            annot2.set_visible(False) 
+            annot2.set_visible(False)
 
             if ncomp>2:
                 sub += 1
@@ -1906,7 +1906,7 @@ class VisualizationsComponent(Component):
 
                 file_list_green = [syn["filename"] for syn in greens if comp in syn["channel"]]
                 if len(file_list_green)==0:
-                    raise LASIFError("No synthetics data available for component '%s'" %comp)        
+                    raise LASIFError("No synthetics data available for component '%s'" %comp)
                 offset_green = [syn["epicentral_distance"] for syn in greens if comp in syn["channel"]]
                 st_green = Stream()
                 for files in file_list_green:
@@ -1930,15 +1930,15 @@ class VisualizationsComponent(Component):
                     net = tr.stats.network
                     stat = tr.stats.station
                     offset_syn.append([wav["epicentral_distance"]
-                                       for wav in waveforms 
+                                       for wav in waveforms
                                        if net in wav["channel_id"].split('.')[0]
                                        and stat in wav["channel_id"].split('.')[1]][0])
 
                 if plot_raw == "True":
                     plot_waveform_section(ax3,st_green, offset_green, scale=scaling,colors='r')
-                plot_waveform_section(ax3,st_wav, offset_wav, scale=scaling, 
+                plot_waveform_section(ax3,st_wav, offset_wav, scale=scaling,
                                       colors='k', lw =2)
-                plot_waveform_section(ax3,st_syn, offset_syn, scale=scaling, 
+                plot_waveform_section(ax3,st_syn, offset_syn, scale=scaling,
                                       colors='b')
                 if plot_window:
                     for arrival, dist in zip(tt_arrival_times, offset_wav):
@@ -1952,7 +1952,7 @@ class VisualizationsComponent(Component):
                 annot3 = ax3.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
                                       bbox=dict(boxstyle="round", fc="w"),
                                       arrowprops=dict(arrowstyle="->"))
-                annot3.set_visible(False) 
+                annot3.set_visible(False)
 
         def on_plot_hover(event):
             # Iterating over each data member plotted

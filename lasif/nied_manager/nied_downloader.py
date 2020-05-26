@@ -11,7 +11,10 @@ from obspy.clients.fdsn.mass_downloader import GlobalDomain
 from obspy import UTCDateTime
 
 from HinetPy import Client, win32
+import keyring
 
+service_id = "yOhiUCGXdVIjPINGJ1J0"
+MAGIC_USERNAME_KEY = "9ug5xNtF3QDnT9voMjWf"
 
 class NiedDownloader():
     """
@@ -35,8 +38,17 @@ class NiedDownloader():
         self.endtime_JST   = self.endtime + datetime.timedelta(hours=9)
 
         # authentication for NIED server
-        user = input("Username: ")
-        pswd = getpass.getpass("Password: ")
+        try:
+            user = keyring.get_password(service_id, MAGIC_USERNAME_KEY)
+            pswd = keyring.get_password(service_id, user)
+        except:
+            user = input("Username: ")
+            pswd = getpass.getpass("Password: ")
+
+            keyring.set_password(service_id, user, pswd)
+            keyring.set_password(service_id, MAGIC_USERNAME_KEY, user)
+
+
         self.client = Client(user,pswd,retries=100)
 
         # select stations from domain boundary
@@ -83,10 +95,10 @@ class NiedDownloader():
                 st_lon = stat.sac.stlo
                 st_lat = stat.sac.stla
 
-                if st_lon < self.domain.min_longitude or \
-                   st_lon > self.domain.max_longitude or \
-                   st_lat < self.domain.min_latitude or \
-                   st_lat > self.domain.max_latitude:
+                if st_lon < self.domain.min_longitude + self.domain.boundary_width_in_degree or \
+                   st_lon > self.domain.max_longitude - self.domain.boundary_width_in_degree or \
+                   st_lat < self.domain.min_latitude  + self.domain.boundary_width_in_degree or \
+                   st_lat > self.domain.max_latitude  - self.domain.boundary_width_in_degree:
                    os.remove(sac)
             except:
                 pass
@@ -100,6 +112,15 @@ class NiedDownloader():
             try: # skip broken files
                 st=obspy.read(sac)
                 st[0].stats.starttime+=datetime.timedelta(hours=-9)
+                # add nied network name in sac file
+                if st[0].stats.sac.kevnm != '':
+                    st[0].stats.network = st[0].stats.sac.kevnm
+                elif st[0].stats.station.startswith('N.S'):
+                    st[0].stats.network = 'S-Net'
+
+                # replace . in station name with _
+                st[0].stats.station = st[0].stats.station.replace('.','_')
+
                 st.write(sac)
             except:
                 pass
@@ -116,10 +137,10 @@ class NiedDownloader():
 
         # pz files are replaced into the station files
         for pz in pzs:
-            try:
+            #try:
                 shutil.move(pz, os.path.join(stationdir,os.path.basename(pz)))
-            except:
-                pass
+            #except:
+            #    pass
 
     def convert_format(self):
         network_dirs = [ f.path for f in os.scandir(self.outdir) if f.is_dir() ]

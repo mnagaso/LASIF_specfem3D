@@ -25,7 +25,7 @@ class DownloadsComponent(Component):
         MPI enabled
         """
 
-        if event_names is None:
+        if event_names is None and not networks.startswith("NIED"):
             from mpi4py import MPI
             from lasif.tools.parallel_helpers import distribute_across_ranks
             events = self.comm.events.list()
@@ -47,8 +47,11 @@ class DownloadsComponent(Component):
             distribute_across_ranks(
                 self.comm.downloads.download_data_for_one_event, items=event_to_download,
                 get_name=lambda x: x["event"],
-                logfile=logfile)            
-
+                logfile=logfile)
+        if event_names is None and networks.startswith("NIED"):
+            event_names = self.comm.events.list()
+            for event in event_names:
+                self.comm.downloads.download_data_for_one_event(event, providers=providers, networks=networks)
         else:
             for event in event_names:
                 self.comm.downloads.download_data_for_one_event(event, providers=providers, networks=networks)
@@ -61,7 +64,7 @@ class DownloadsComponent(Component):
             Restrictions, GlobalDomain
 
         print(" ")
-        print(("######## Looking for data for "+event["event_name"]+" #########"))    
+        print(("######## Looking for data for "+event["event_name"]+" #########"))
         print(" ")
 
         proj = self.comm.project
@@ -129,13 +132,13 @@ class DownloadsComponent(Component):
             dlh = NiedDownloader(starttime=starttime,
                                  endtime=endtime,
                                  network=networks,
-                                 domain=domain,
+                                 domain=proj.domain,
                                  )
             sacpaz_path=self.comm.project.paths["sacpz"]
             dlh.download(outdir=mseed_storage,stationdir=sacpaz_path)
 
         print("")
-        
+
     def query_station_inventory(self, starttime, endtime):
         """
         Query stations inside the domain and store the inventory
@@ -153,12 +156,12 @@ class DownloadsComponent(Component):
         from obspy.clients.fdsn import Client
         from obspy.clients.fdsn.header import URL_MAPPINGS
         from obspy.core.inventory import Inventory
-        
-        
+
+
         proj = self.comm.project
         #ds = proj.config["download_settings"]
         #channel_priorities=ds["channel_priorities"]
-        
+
         if isinstance(proj.domain, lasif.domain.GlobalDomain):
             minlongitude = 0
             maxlongitude = 360
@@ -170,8 +173,8 @@ class DownloadsComponent(Component):
             maxlongitude = domain_points["upper_right"]["longitude"]
             minlatitude = domain_points["bottom_left"]["latitude"]
             maxlatitude = domain_points["upper_right"]["latitude"]
-            
-        
+
+
         inventory = Inventory()
         print("Querying station availability. This might take a while ...")
         for client_name in sorted(URL_MAPPINGS.keys()):
@@ -186,7 +189,7 @@ class DownloadsComponent(Component):
             if inv:
                 inventory.extend(inv)
         return inventory
-        
+
 
     def _get_stationxml_storage_fct(self, starttime, endtime):
         # Get the stationxml storage function required by the download helpers.

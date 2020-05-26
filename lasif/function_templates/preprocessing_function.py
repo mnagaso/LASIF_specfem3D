@@ -123,7 +123,7 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
 
 
 
-    def signal_to_noise_ratio(data,first_tt_arrival, process_params):    
+    def signal_to_noise_ratio(data,first_tt_arrival, process_params):
 
         minimum_period = 1./process_params["highpass"]
         dt = process_params["dt"]
@@ -144,14 +144,14 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
 
         if idx_noise_start >= idx_noise_end:
             idx_noise_start = max(10, idx_noise_end - 10)
-        
+
         abs_data = np.abs(data[idx_sigwin_start:idx_sigwin_end])
         noise_absolute = np.abs(data[idx_noise_start:idx_noise_end]).max()
         noise_relative = noise_absolute / abs_data.max()
 
         return noise_relative, noise_absolute
 
-    
+
 
     info_msg = []
     # =========================================================================
@@ -213,7 +213,7 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
         if not np.isfinite(tr.data).all():
             msg = "Data contains NaNs or Infs. File skipped"
             raise LASIFError(msg)
-            
+
         # check that the window and interpolated trace (to be done below) will contain seismic phase
         if processing_info["first_P_arrival"]/processing_info["process_params"]["dt"] \
             >= processing_info["process_params"]["npts"]:
@@ -272,7 +272,7 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
         f1 = 0.5 * f2
         f4 = 2.0 * f3
         pre_filt = (f1, f2, f3, f4)
-        
+
 
         # processing for seed files ==============================================
         if "/SEED/" in station_file:
@@ -339,6 +339,8 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
                        "StationXML file '%s'. Due to: '%s'  Will be skipped.") \
                     % (channel_infos["station_filename"], e.__repr__()),
                 raise LASIFError(msg)
+        elif "/SACPZ/" in station_file:
+            pass
         else:
             raise NotImplementedError
 
@@ -368,7 +370,7 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
             method="lanczos", starttime=starttime, window="blackman", a=12,
             npts=processing_info["process_params"]["npts"])
 
-        # save 3 channels into a stream   
+        # save 3 channels into a stream
         stream += tr
     #print(stream)
 
@@ -384,7 +386,7 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
         else:
             from obspy.geodetics.base import gps2dist_azimuth
             epicentral_distance, azimuth, baz = gps2dist_azimuth(
-                processing_info["event_information"]["latitude"], processing_info["event_information"]["longitude"], 
+                processing_info["event_information"]["latitude"], processing_info["event_information"]["longitude"],
                 receiver["latitude"],receiver["longitude"])
             stream.rotate('NE->RT', back_azimuth = baz)
 
@@ -395,7 +397,7 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
     # compute the noise_relative level
     for channel_id, tr in zip(waveform_infos, stream):
         channel_infos = waveform_infos[channel_id]
-        snr = signal_to_noise_ratio(tr.data, processing_info["first_P_arrival"], 
+        snr = signal_to_noise_ratio(tr.data, processing_info["first_P_arrival"],
                                     processing_info["process_params"])[0]
 
         # selection
@@ -436,9 +438,9 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
                     temp = channel_id.split('.')
                     channel_to_print = temp[0]+'.'+temp[1]+'.'+temp[2]+'.'+temp[3][:-1]+'T'
             msg = "\tNon selected trace for %s due to low snr (%0.2f > %0.2f)"\
-                %(channel_to_print, snr, noise_threshold)            
+                %(channel_to_print, snr, noise_threshold)
             #warnings.warn(msg, UserWarning)
             print(msg)
-            
-            
-    
+
+
+

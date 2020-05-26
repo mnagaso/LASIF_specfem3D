@@ -10,7 +10,8 @@ def simple_sacpz_parser(filename):
         channel_id,start_date,end_date,
         latitude,longitude,elevation_in_m,local_depth_in_m
 
-    The datetime value in NIED SAC files are all in JST time (UTC + 9).
+    The datetime value in origina NIED SAC files are all in JST time (UTC + 9).
+    This has already converted to GMT when downloaded.
     """
 
     channel = {}
@@ -21,9 +22,9 @@ def simple_sacpz_parser(filename):
     #channel["channel_id"]       = "{}.{}.{}".format(stat["station"],stat["location"],stat["channel"])
     channel["start_date"]       = stat["starttime"]
     channel["end_date"]         = stat["endtime"]
-    channel["latitude"]         = sac.stla
-    channel["longitude"]        = sac.stlo
-    channel["elevation_in_m"]   = sac.stel
+    channel["latitude"]         = float(sac.stla)
+    channel["longitude"]        = float(sac.stlo)
+    channel["elevation_in_m"]   = float(sac.stel)
     channel["local_depth_in_m"] = -1.*sac.stel
 
     return [channel]

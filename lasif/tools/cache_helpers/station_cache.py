@@ -166,15 +166,15 @@ class StationCache(FileInfoCache):
             msg = "Not a valid sacpz file?"
             raise StationCacheError(msg)
 
-        #channels = [[
-        #    _i["channel_id"], int(_i["start_date"].timestamp),
-        #    int(_i["end_date"].timestamp) if _i["end_date"] else None,
-        #    _i["latitude"], _i["longitude"], _i["elevation_in_m"],
-        #    _i["local_depth_in_m"]] for _i in channels]
         channels = [[
             _i["channel_id"], int(_i["start_date"].timestamp),
             int(_i["end_date"].timestamp) if _i["end_date"] else None,
-            None,None,None,None] for _i in channels]
+            _i["latitude"], _i["longitude"], _i["elevation_in_m"],
+            _i["local_depth_in_m"]] for _i in channels]
+        #channels = [[
+        #    _i["channel_id"], int(_i["start_date"].timestamp),
+        #    int(_i["end_date"].timestamp) if _i["end_date"] else None,
+        #    None,None,None,None] for _i in channels]
         #channels = [[
         #    _i["channel_id"], 0,
         #    32481591010.0,

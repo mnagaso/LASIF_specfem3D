@@ -2298,6 +2298,44 @@ def lasif_iteration_status(parser, args):
                   len(st["missing_synthetic"])))
 
 
+# function for SPECFEM_FWI
+def lasif_specfemfwi_output(parser, args):
+    """
+    outputs:
+    - seismo data in hdf5 format
+    - STATION file
+    for each event
+    """
+    from lasif.specfem3dfwi_helpers.station_writer_specfwi import StationWriterSpecFwi
+    #import lasif.specfem3dfwi_helper.wavedata_writer_specfwi as wavedata_writer
+    #import lasif.specfem3dfwi_helper.setup_file_writer_pyspec as setupfile_writer
+
+    # get all events of the specified iteration
+    parser.add_argument("iteration_name", help="name of the iteration")
+    args = parser.parse_args(args)
+    iteration_name = args.iteration_name
+
+    comm = _find_project_comm(".", args.read_only_caches)
+    status = comm.query.get_iteration_status(iteration_name)
+    iteration = comm.iterations.get(iteration_name)
+
+    print(("Iteration %s is defined for %i events:" % (iteration_name,
+                                                      len(iteration.events))))
+
+    # output station file
+    fwi_st = StationWriterSpecFwi(comm, iteration_name)
+
+    # loop over all events of this iteration
+    for event in sorted(status.keys()):
+        pass
+        # output waveform data
+
+
+    # output setup file for pyspecfem
+
+
+
+
 def lasif_tutorial(parser, args):
     """
     Open the tutorial in a webbrowser.
