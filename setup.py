@@ -73,7 +73,8 @@ setup_config = dict(
         "Pillow",
         "instaseis",
         "h5py",
-        "keyring"
+        "keyring",
+        "obspyh5"
     ],
     package_data={
         "lasif": get_package_data()},
