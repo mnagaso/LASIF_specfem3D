@@ -2312,8 +2312,17 @@ def lasif_specfemfwi_output(parser, args):
 
     # get all events of the specified iteration
     parser.add_argument("iteration_name", help="name of the iteration")
+    parser.add_argument("--window_margin", type=int,
+                        help="time margin before the first arrival in second.",
+                        default=5)
+    parser.add_argument("--window_length", type=int,
+                        help="length of time window in second.",
+                        default=60)
+
     args = parser.parse_args(args)
     iteration_name = args.iteration_name
+    window_margine = args.window_margin
+    window_length  = args.window_length
 
     comm = _find_project_comm(".", args.read_only_caches)
     status = comm.query.get_iteration_status(iteration_name)

@@ -1,44 +1,32 @@
-import os,h5py
-from lasif.components.component import Component
+import os
+import pandas as pd
+import numpy as np
 
-class StationWriterSpecFwi(Component):
+class StationWriterSpecFwi():
     """
     a class which
     - extracts station information for specified event
-    - writeout one single hdf5 STATION file storing all station of all events
+    - writeout one singl STATION file for each event
 
     the composition of output file is:
-
-    stations_fwi.h5/EVENTNAME_0/station
-                              /network
-                              /latitude (deg)
-                              /longitude (deg)
-                              /elevation (m)
-                              /burial (m)
-                   /EVENTNAME_1/...
-                   ...
-
     """
+
     def __init__(self,comm,iteration_name):
         # initialize the output file
         self.comm = comm
-        outdir = os.path.join(self.comm.project.paths["output"],iteration_name)
+        self.outdir = os.path.join(self.comm.project.paths["output"],iteration_name)
         # create iteration directory in OUTPUT
         try:
-            os.makedirs(outdir)
+            os.makedirs(self.outdir)
         except OSError:
-            if not os.path.isdir(outdir):
+            if not os.path.isdir(self.outdir):
                 raise
-        self.outfile = os.path.join(outdir,"stations_fwi.h5")
 
         status = self.comm.query.get_iteration_status(iteration_name)
-        # create file
-        with h5py.File(self.outfile,"w") as f:
-            print("creating a station file at ",self.outfile)
 
-            # loop over events
-            for event in sorted(status.keys()):
-                self._write(event)
+        # loop over events
+        for event in sorted(status.keys()):
+            self._write(event)
 
 
     def _write(self,event_name):
@@ -51,4 +39,31 @@ class StationWriterSpecFwi(Component):
         except LASIFError:
             stations = {}
 
-        print(stations)
+        # reformat station dictionary for outputting in SPECFEM format
+        station = []
+        network = []
+        latitude = []
+        longitude = []
+        elevation = []
+        burial = []
+
+        for a_st in stations:
+            st = stations[a_st]
+            station.append(a_st.split(".")[1])
+            network.append(a_st.split(".")[0])
+            latitude.append( st["latitude"])
+            longitude.append(st["longitude"])
+            elevation.append(st["elevation_in_m"])
+            burial.append(   st["local_depth_in_m"])
+
+        dict_stations={"station":station,
+                       "network":network,
+                       "latitude":latitude,
+                       "longitude":longitude,
+                       "elevation":elevation,
+                       "burial":burial,
+        }
+
+        df = pd.DataFrame(dict_stations)
+        # write
+        df.to_csv(os.path.join(self.outdir,"STATIONS_"+event_name),sep=" ", index=False, header=False)
