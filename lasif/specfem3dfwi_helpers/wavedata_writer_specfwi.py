@@ -10,15 +10,17 @@ class WavedataWriter():
     """
     write a waveform data in hdf5 format
     for SPECFEM3D_FWI input
-
-
     """
+
     def __init__(self, comm, iteration_name, window_margin, window_length):
         self.comm = comm
         self.outdir = os.path.join(self.comm.project.paths["output"],iteration_name)
         self.window_margin = window_margin
         self.window_length = window_length
         status = self.comm.query.get_iteration_status(iteration_name)
+
+        # store some info for PySpecfem setup file
+        self.tr_info = {}
 
         # loop over events
         for event in sorted(status.keys()):
@@ -58,10 +60,13 @@ class WavedataWriter():
         # cut timewindow
         st_cut = st.slice(datetime_fastest-datetime.timedelta(seconds=self.window_margin),
                           datetime_fastest+datetime.timedelta(seconds=self.window_length))
-        print(st[0].stats)
-        print(fastest_arrv)
-        print(len(st))
-        print(len(st_cut))
+
+        # store windowed trace information for each event
+        self.tr_info[event_name] = {'time_length':st_cut[0].stats.delta*st_cut[0].count(),
+                                    'time_step':st_cut[0].stats.delta,
+                                    'time_begin':fastest_arrv-self.window_margin,
+                                    'time_end':  fastest_arrv-self.window_margin+self.window_length}
+
         obspyh5.writeh5(st_cut,outfile)
 
 

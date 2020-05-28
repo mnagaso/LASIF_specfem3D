@@ -2307,8 +2307,9 @@ def lasif_specfemfwi_output(parser, args):
     for each event
     """
     from lasif.specfem3dfwi_helpers.station_writer_specfwi import StationWriterSpecFwi
+    from lasif.specfem3dfwi_helpers.cmt_writer_specfwi import CmtWriterSpecFwi
     from lasif.specfem3dfwi_helpers.wavedata_writer_specfwi import WavedataWriter
-    from lasif.specfem3dfwi_helper.setup_file_writer_pyspec import PySpeSetupWriter
+    from lasif.specfem3dfwi_helpers.setup_file_writer_pyspec import PySpeSetupWriter
 
     # get all events of the specified iteration
     parser.add_argument("iteration_name", help="name of the iteration")
@@ -2333,10 +2334,12 @@ def lasif_specfemfwi_output(parser, args):
 
     # output station file
     _ = StationWriterSpecFwi(comm, iteration_name)
+    # output cmt solution files
+    _ = CmtWriterSpecFwi(comm, iteration_name)
     # output waveform data
-    _ = WavedataWriter(comm, iteration_name, window_margin, window_length)
+    windowed_wavedata = WavedataWriter(comm, iteration_name, window_margin, window_length)
     # output pyspecfem setup file
-    _ =
+    _ = PySpeSetupWriter(comm, iteration_name, windowed_wavedata.tr_info)
 
 
 def lasif_tutorial(parser, args):
