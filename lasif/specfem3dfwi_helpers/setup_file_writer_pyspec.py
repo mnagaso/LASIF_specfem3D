@@ -39,7 +39,7 @@ class PySpeSetupWriter():
         self.SIZE_EL_IN_KM = self._get_element_size()
 
         # AxiSEM dominant period
-        self.DOMINANT_PERIOD = 10.
+        self.DOMINANT_PERIOD = self._get_dominant_period()
 
         # initialize string objects
         self.TIME_BEGIN=""
@@ -70,14 +70,19 @@ class PySpeSetupWriter():
         self._create_string()
         self._write()
 
+    def _get_dominant_period(self):
+        it = self.comm.iterations.get(self.iteration_name)
+        dp = it.data_preprocessing["lowpass_period"] # get lowpass period as a dominant period for AxiSEM
+        return dp
+
     def _get_element_size(self):
         it = self.comm.iterations.get(self.iteration_name)
         lowpass_period = it.data_preprocessing["lowpass_period"]
         #  a lowest wave speed in the target domain
         vs_slow = 3.8 # km/s
-        # propose 2 control nodes par 1 wave length
-        dt = vs_slow*lowpass_period/2.0
-        return dt
+        # propose 1 spectral element par 1 wave length
+        ds = vs_slow*lowpass_period/2.0
+        return ds
 
     def _write(self):
         with open(self.outfile,"w") as f:
