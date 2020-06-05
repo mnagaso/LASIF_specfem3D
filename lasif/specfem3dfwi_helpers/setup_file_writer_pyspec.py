@@ -230,6 +230,9 @@ time_length : {self.time_length}
 time_step : {self.time_step}
 time_step_data : {self.time_step_data}
 
+# GPU mode
+use_gpu : 1
+
 #################################################################
 #                                                               #
 #                                                               #
