@@ -28,3 +28,55 @@ def simple_sacpz_parser(filename):
     channel["local_depth_in_m"] = -1.*sac.stel
 
     return [channel]
+
+def channel_name_converter_for_NIED2SPECFEM(c):
+    if c == "VX": # NIED S-net
+        r = "UX"
+    elif c == "VY":
+        r = "UY"
+    elif c == "VZ":
+        r = "UZ"
+    elif c == "E": # NIED  Hi-net
+        r = "UX"
+    elif c == "N":
+        r = "UY"
+    elif c == "U":
+        r = "UZ"
+    elif c == "X":
+        r = "UX"
+    elif c == "Y":
+        r = "UY"
+
+    else:
+        print("component name {} is not recognised by wavedata_writer_specfwi.py".format(c))
+        print("please add your rule into _conversion_rules")
+
+    return r
+
+
+def channel_name_converter_for_NIED2LASIF(c):
+    if c == "VX": # NIED S-net
+        r = "E"
+    elif c == "VY":
+        r = "N"
+    elif c == "VZ":
+        r = "Z"
+    elif c == "E": # NIED  Hi-net
+        r = "E"
+    elif c == "N":
+        r = "N"
+    elif c == "U":
+        r = "Z"
+    elif c == "X":
+        r = "E"
+    elif c == "Y":
+        r = "N"
+
+    else:
+        print("component name {} is not recognised by wavedata_writer_specfwi.py".format(c))
+        print("please add your rule into _conversion_rules")
+
+    #print("debug c2r", c, r)
+
+    return r
+

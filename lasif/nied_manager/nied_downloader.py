@@ -13,6 +13,8 @@ from obspy import UTCDateTime
 from HinetPy import Client, win32
 import keyring
 
+from lasif.nied_manager.nied_filehandler import *
+
 service_id = "yOhiUCGXdVIjPINGJ1J0"
 MAGIC_USERNAME_KEY = "9ug5xNtF3QDnT9voMjWf"
 
@@ -108,6 +110,7 @@ class NiedDownloader():
         pzs  = glob.glob(self.outdir+"/*.SAC_PZ")
 
         # modify the timezone in sac files and overwrite
+        # change the component name for LASIF
         for sac in sacs:
             try: # skip broken files
                 st=obspy.read(sac)
@@ -121,17 +124,32 @@ class NiedDownloader():
                 # replace . in station name with _
                 st[0].stats.station = st[0].stats.station.replace('.','_')
 
+                # change component name
+                st[0].stats.sac.kcmpnm = channel_name_converter_for_NIED2LASIF(st[0].stats.sac.kcmpnm)
+                st[0].stats.channel = channel_name_converter_for_NIED2LASIF(st[0].stats.channel)
+
                 st.write(sac)
+
+                # modify the filename
+                sep=sac.split(".")
+                sep[-2] = channel_name_converter_for_NIED2LASIF(sep[-2])
+                sac_mod = ".".join(x for x in sep)
+                os.rename(sac,sac_mod)
             except:
                 pass
 
         for sac in sacs:
             try: # make symlink if not exits
+                # modify the filename
+                sep=sac.split(".")
+                sep[-2] = channel_name_converter_for_NIED2LASIF(sep[-2])
+                sac_mod = ".".join(x for x in sep)
+
                 # here event name is added at the head of filename
                 # to be found by station_cache registration process.
-                link_name=self.outdir.split("/")[-2]+"_"+os.path.basename(sac)
+                link_name=self.outdir.split("/")[-2]+"_"+os.path.basename(sac_mod)
                 print(link_name)
-                os.symlink(sac, os.path.join(stationdir,link_name))
+                os.symlink(sac_mod, os.path.join(stationdir,link_name))
             except:
                 pass
 

@@ -4,7 +4,7 @@ import obspy, obspyh5
 from obspy.geodetics.base import locations2degrees
 from obspy.taup import TauPyModel
 earth_model = TauPyModel("ak135")
-
+from lasif.nied_manager.nied_filehandler import *
 
 class WavedataWriter():
     """
@@ -67,7 +67,30 @@ class WavedataWriter():
                                     'time_begin':fastest_arrv-self.window_margin,
                                     'time_end':  fastest_arrv-self.window_margin+self.window_length}
 
-        obspyh5.writeh5(st_cut,outfile)
+        # convert components from velocity to displacement and change the names of components to specfem_fwi
+        st_final = self._convert_components(st_cut)
+
+        # set the dataset name rule
+        obspyh5.set_index("waveforms/{network}.{station}/{channel}")
+        obspyh5.writeh5(st_final,outfile)
+
+
+    def _convert_components(self,st):
+        """
+        convert velocity to displacement by integrating on time
+        then change the name of components to UX,UY,UZ
+        which specfem_fwi may read
+        """
+
+        for tr in st:
+            # here it is not necessary to convert from velocity to displacement
+            # velocity signal may be treated as displacement in specfem_fwi
+            # integrate
+            # tr = tr.integrate()
+            # change component name
+            tr.stats.channel = channel_name_convarter_for_NIED2SPECFEM(tr.stats.channel)
+
+        return st
 
 
     def _calculate_fastest_arrival(self,event_name):

@@ -46,14 +46,15 @@ class PySpeSetupWriter():
         self.TIME_END=""
         self.CMT_file_string=""
         self.STATION_file_string=""
+        self.WAVEFORM_file_string=""
 
         # loop over events
         for i_ev, event in enumerate(sorted(status.keys())):
             if i_ev == 0:
                 # SPECFEM time step settings
                 self.time_length = tr_info[event]['time_length']
-                self.time_step = tr_info[event]['time_step']
-                self.time_step_data = tr_info[event]['time_step'] * 2 # should be configured mannually
+                self.time_step = tr_info[event]['time_step']/40.0 # !! this should be something finer than data DT
+                self.time_step_data = tr_info[event]['time_step'] # should be configured mannually
 
             # start/end time of SPECFEM calculation window in second (0 at event time)
             self.TIME_BEGIN += " "+str(tr_info[event]['time_begin'])
@@ -65,6 +66,8 @@ class PySpeSetupWriter():
             # STATION file list
             self.STATION_file_string+= "STATION_FILE : STATIONS_{}\n".format(event)
 
+            # waveform file list
+            self.WAVEFORM_file_string+= "WAVEFORM_FILE : waveform_{}.h5\n".format(event)
 
         # write out
         self._create_string()
@@ -72,7 +75,7 @@ class PySpeSetupWriter():
 
     def _get_dominant_period(self):
         it = self.comm.iterations.get(self.iteration_name)
-        dp = it.data_preprocessing["lowpass_period"] # get lowpass period as a dominant period for AxiSEM
+        dp = it.data_preprocessing["highpass_period"] # get highpass period as a dominant period for AxiSEM
         return dp
 
     def _get_element_size(self):
@@ -80,7 +83,7 @@ class PySpeSetupWriter():
         lowpass_period = it.data_preprocessing["lowpass_period"]
         #  a lowest wave speed in the target domain
         vs_slow = 3.8 # km/s
-        # propose 1 spectral element par 1 wave length
+        # propose 2 spectral element par 1 wave length
         ds = vs_slow*lowpass_period/2.0
         return ds
 
@@ -214,6 +217,9 @@ NRADIAL_SLICES : 2
 station_type : geo_file
 {self.STATION_file_string}
 
+# waveform data path
+{self.WAVEFORM_file_string}
+
 #################################################################
 #                                                               #
 #                                                               #
@@ -243,6 +249,7 @@ use_gpu : 1
 
 TIME_BEGIN : {self.TIME_BEGIN}
 TIME_END   : {self.TIME_END}
+
 #################################################################
 #                                                               #
 #                                                               #
@@ -273,5 +280,5 @@ use_inverse_problem : 1
 
 mpirun_command : mpirun.mpich
 hdf5_enabled : 1
-number_of_io_node : 2
+number_of_io_node : 1
 """
