@@ -46,7 +46,8 @@ def channel_name_converter_for_NIED2SPECFEM(c):
         r = "UX"
     elif c == "Y":
         r = "UY"
-
+    elif c == "Z":
+        r = "UZ"
     else:
         print("component name {} is not recognised by wavedata_writer_specfwi.py".format(c))
         print("please add your rule into _conversion_rules")

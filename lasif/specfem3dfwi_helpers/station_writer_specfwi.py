@@ -50,7 +50,11 @@ class StationWriterSpecFwi():
         for a_st in stations:
             st = stations[a_st]
             station.append(a_st.split(".")[1])
-            network.append(a_st.split(".")[0])
+            a_network = a_st.split(".")[0]
+            if len(a_network) == 0:
+                # MeSO net does not include network name in SAC
+                a_network = "MeSO-net"
+            network.append(a_network)
             latitude.append( st["latitude"])
             longitude.append(st["longitude"])
             elevation.append(st["elevation_in_m"])

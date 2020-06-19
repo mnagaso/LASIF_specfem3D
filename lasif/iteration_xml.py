@@ -353,7 +353,7 @@ def _recursive_etree(dictionary):
 
 def create_iteration_xml_string(iteration_name, solver_name, events,
                                 min_period, max_period,
-                                seconds_prior_arrival, window_length_in_sec, 
+                                seconds_prior_arrival, window_length_in_sec,
                                 quiet=False):
     """
     Creates a new iteration string.
@@ -380,6 +380,8 @@ def create_iteration_xml_string(iteration_name, solver_name, events,
         solver_name = "SPECFEM3D CARTESIAN"
     elif solver_name.lower() == "specfem3d_globe_cem":
         solver_name = "SPECFEM3D GLOBE CEM"
+    elif solver_name.lower() == "specfem3d_fwi":
+        solver_name = "SPECFEM3D FWI"
     else:
         raise NotImplementedError
 
@@ -452,6 +454,9 @@ def _get_default_solver_settings(solver, min_period, max_period, quiet=False):
     elif solver.lower() == "specfem3d_globe_cem":
         from lasif.utils import generate_specfem3d_globe_cem_template
         return generate_specfem3d_globe_cem_template()
+    elif solver.lower() == "specfem3d_fwi":
+        from lasif.utils import generate_specfem3d_cartesian_template
+        return generate_specfem3d_cartesian_template()
     else:
         msg = "Solver '%s' not known. Known solvers: %s" % (
             solver, ",".join(known_solvers))

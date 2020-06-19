@@ -4,7 +4,8 @@ import obspy, obspyh5
 from obspy.geodetics.base import locations2degrees
 from obspy.taup import TauPyModel
 earth_model = TauPyModel("ak135")
-from lasif.nied_manager.nied_filehandler import *
+from lasif.nied_manager.nied_filehandler import channel_name_converter_for_NIED2SPECFEM
+
 
 class WavedataWriter():
     """
@@ -12,11 +13,11 @@ class WavedataWriter():
     for SPECFEM3D_FWI input
     """
 
-    def __init__(self, comm, iteration_name, window_margin, window_length):
+    def __init__(self, comm, iteration_name):
         self.comm = comm
         self.outdir = os.path.join(self.comm.project.paths["output"],iteration_name)
-        self.window_margin = window_margin
-        self.window_length = window_length
+        self.window_margin = 5
+        self.window_length = 50
         status = self.comm.query.get_iteration_status(iteration_name)
 
         # store some info for PySpecfem setup file
@@ -34,6 +35,10 @@ class WavedataWriter():
         iteration = self.comm.iterations.get(iteration_name)
         pparam = iteration.get_process_params()
         processing_tag = iteration.processing_tag
+
+        # get the window info defined in iteration
+        self.window_margin = iteration.data_preprocessing["seconds_prior_arrival"]
+        self.window_length = iteration.data_preprocessing["window_length_in_sec"]
 
         # Get station and waveform infos
         station_coordinates = self.comm.query.get_all_stations_for_event(event_name)
@@ -67,7 +72,7 @@ class WavedataWriter():
                                     'time_begin':fastest_arrv-self.window_margin,
                                     'time_end':  fastest_arrv-self.window_margin+self.window_length}
 
-        # convert components from velocity to displacement and change the names of components to specfem_fwi
+        # convert component names for specfem_fwi compatibility
         st_final = self._convert_components(st_cut)
 
         # set the dataset name rule
@@ -77,8 +82,7 @@ class WavedataWriter():
 
     def _convert_components(self,st):
         """
-        convert velocity to displacement by integrating on time
-        then change the name of components to UX,UY,UZ
+        change the name of components to UX,UY,UZ
         which specfem_fwi may read
         """
 
@@ -88,7 +92,7 @@ class WavedataWriter():
             # integrate
             # tr = tr.integrate()
             # change component name
-            tr.stats.channel = channel_name_convarter_for_NIED2SPECFEM(tr.stats.channel)
+            tr.stats.channel = channel_name_converter_for_NIED2SPECFEM(tr.stats.channel)
 
         return st
 

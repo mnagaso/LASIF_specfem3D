@@ -394,6 +394,9 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
     # =========================================================================
     # Step 7: Waveform selection based on SNR
     # =========================================================================
+    tr_stack = {}
+    fname_stack = {}
+
     # compute the noise_relative level
     for channel_id, tr in zip(waveform_infos, stream):
         channel_infos = waveform_infos[channel_id]
@@ -426,8 +429,25 @@ def preprocessing_function(processing_info, iteration, components, noise_thresho
                                                               str(new_channel_id))
 
 
-                # write output data file
-                tr.write(output_filename, format=tr.stats._format)
+                if "FWI" in iteration.solver_settings["solver"]:
+                    # SPECEFM3D FWI requires full 3 components so write trace only when
+                    # they have been collected.
+                    sta_name = tr.stats.station
+                    if sta_name in tr_stack:
+                        tr_stack[sta_name].append(tr)
+                        fname_stack[sta_name].append(output_filename)
+                    else:
+                        tr_stack[sta_name] = [tr]
+                        fname_stack[sta_name] = [output_filename]
+
+                    if len(tr_stack[sta_name]) == 3:
+                        for i,tr in enumerate(tr_stack[sta_name]):
+                            tr.write(fname_stack[sta_name][i], format=tr.stats._format)
+
+                else:
+                    # write output data file
+                    tr.write(output_filename, format=tr.stats._format)
+
         else:
             channel_to_print = channel_id
             if 'R' in components or 'T' in components:

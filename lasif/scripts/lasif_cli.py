@@ -1203,7 +1203,8 @@ def lasif_create_new_iteration(parser, args):
     parser.add_argument("solver_name", help="name of the solver",
                         choices=("SES3D_4_1", "SES3D_2_0",
                                  "SPECFEM3D_CARTESIAN",
-                                 "SPECFEM3D_GLOBE_CEM"))
+                                 "SPECFEM3D_GLOBE_CEM",
+                                 "SPECFEM3D_FWI"))
     parser.add_argument("--seconds_prior", type=float, default=5.,
                         help="nb of seconds prior the theoretical phase arrival time used to window seismograms for quality control, default 5")
     parser.add_argument("--window_length", type=float, default=50.,
@@ -2313,17 +2314,17 @@ def lasif_specfemfwi_output(parser, args):
 
     # get all events of the specified iteration
     parser.add_argument("iteration_name", help="name of the iteration")
-    parser.add_argument("--window_margin", type=int,
-                        help="time margin before the first arrival in second.",
-                        default=5)
-    parser.add_argument("--window_length", type=int,
-                        help="length of time window in second.",
-                        default=60)
+    #parser.add_argument("--window_margin", type=int,
+    #                    help="time margin before the first arrival in second.",
+    #                    default=5)
+    #parser.add_argument("--window_length", type=int,
+    #                    help="length of time window in second.",
+    #                    default=60)
 
     args = parser.parse_args(args)
     iteration_name = args.iteration_name
-    window_margin  = args.window_margin
-    window_length  = args.window_length
+    #window_margin  = args.window_margin
+    #window_length  = args.window_length
 
     comm = _find_project_comm(".", args.read_only_caches)
     status = comm.query.get_iteration_status(iteration_name)
@@ -2337,7 +2338,7 @@ def lasif_specfemfwi_output(parser, args):
     # output cmt solution files
     _ = CmtWriterSpecFwi(comm, iteration_name)
     # output waveform data
-    windowed_wavedata = WavedataWriter(comm, iteration_name, window_margin, window_length)
+    windowed_wavedata = WavedataWriter(comm, iteration_name)
     # output pyspecfem setup file
     _ = PySpeSetupWriter(comm, iteration_name, windowed_wavedata.tr_info)
 
