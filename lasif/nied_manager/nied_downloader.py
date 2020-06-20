@@ -111,6 +111,7 @@ class NiedDownloader():
 
         # modify the timezone in sac files and overwrite
         # change the component name for LASIF
+        # for MeSO net, those SAC files do not include the network name, so add here those network name
         for sac in sacs:
             try: # skip broken files
                 st=obspy.read(sac)
@@ -120,6 +121,9 @@ class NiedDownloader():
                     st[0].stats.network = st[0].stats.sac.kevnm
                 elif st[0].stats.station.startswith('N.S'):
                     st[0].stats.network = 'S-Net'
+                else: # for MeSO
+                    st[0].stats.network = 'MeSO-Net'
+                    st[0].stats.sac.kevnm = 'MeSO-Net'
 
                 # replace . in station name with _
                 st[0].stats.station = st[0].stats.station.replace('.','_')

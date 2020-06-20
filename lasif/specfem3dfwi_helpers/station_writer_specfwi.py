@@ -23,6 +23,7 @@ class StationWriterSpecFwi():
                 raise
 
         status = self.comm.query.get_iteration_status(iteration_name)
+        self.iteration = self.comm.iterations.get(iteration_name)
 
         # loop over events
         for event in sorted(status.keys()):
@@ -39,6 +40,14 @@ class StationWriterSpecFwi():
         except LASIFError:
             stations = {}
 
+        # get selected waveform data
+        processing_tag = self.iteration.processing_tag
+        waveforms = self.comm.waveforms.get_metadata_processed(event_name, processing_tag)
+        # store valid stations for the selected preprocess
+        valid_st = []
+        for waveform in waveforms:
+            valid_st.append(waveform['network']+"."+waveform['station'])
+
         # reformat station dictionary for outputting in SPECFEM format
         station = []
         network = []
@@ -48,17 +57,16 @@ class StationWriterSpecFwi():
         burial = []
 
         for a_st in stations:
-            st = stations[a_st]
-            station.append(a_st.split(".")[1])
-            a_network = a_st.split(".")[0]
-            if len(a_network) == 0:
-                # MeSO net does not include network name in SAC
-                a_network = "MeSO-net"
-            network.append(a_network)
-            latitude.append( st["latitude"])
-            longitude.append(st["longitude"])
-            elevation.append(st["elevation_in_m"])
-            burial.append(   st["local_depth_in_m"])
+            st_name = a_st.split(".")[1]
+            net_name = a_st.split(".")[0]
+            if net_name+"."+st_name in valid_st:
+                st = stations[a_st]
+                station.append(st_name)
+                network.append(net_name)
+                latitude.append( st["latitude"])
+                longitude.append(st["longitude"])
+                elevation.append(st["elevation_in_m"])
+                burial.append(   st["local_depth_in_m"])
 
         dict_stations={"station":station,
                        "network":network,

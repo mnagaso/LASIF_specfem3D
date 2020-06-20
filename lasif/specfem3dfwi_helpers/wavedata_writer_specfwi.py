@@ -43,9 +43,6 @@ class WavedataWriter():
         # Get station and waveform infos
         station_coordinates = self.comm.query.get_all_stations_for_event(event_name)
         waveforms = self.comm.waveforms.get_metadata_processed(event_name, processing_tag)
-        ## select waveforms for requested components:
-        #waveforms = [wav for wav in waveforms
-        #             if wav["channel"][-1] in components]
 
         # Group by station name.
         def func(x):
@@ -64,7 +61,8 @@ class WavedataWriter():
 
         # cut timewindow
         st_cut = st.slice(datetime_fastest-datetime.timedelta(seconds=self.window_margin),
-                          datetime_fastest+datetime.timedelta(seconds=self.window_length))
+                          datetime_fastest+datetime.timedelta(seconds=self.window_length),
+                          nearest_sample=False)
 
         # store windowed trace information for each event
         self.tr_info[event_name] = {'time_length':st_cut[0].stats.delta*st_cut[0].count(),
@@ -93,7 +91,6 @@ class WavedataWriter():
             # tr = tr.integrate()
             # change component name
             tr.stats.channel = channel_name_converter_for_NIED2SPECFEM(tr.stats.channel)
-
         return st
 
 
