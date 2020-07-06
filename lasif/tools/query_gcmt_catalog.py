@@ -59,7 +59,7 @@ class SphericalNearestNeighbour(object):
 
 def download_GCMT_catalog_from_url(year):
     """
-    Helper function downloading the GCMT catalog as a ndk file for one year 
+    Helper function downloading the GCMT catalog as a ndk file for one year
     from https://www.ldeo.columbia.edu/~gcmt/projects/CMT/catalog/NEW_MONTHLY/
 
     save monthly ndk files within Lasif to data/GCMT_Catalog
@@ -86,7 +86,7 @@ def download_GCMT_catalog_from_url(year):
             if r.status_code ==200:
                 print(("Requesting CMT catalog at %s"%child_url))
                 if not os.path.exists(child_folder):
-                    os.makedirs(child_folder)   
+                    os.makedirs(child_folder)
                 with open(os.path.join(child_folder, ndk_file), 'w') as f:
                     f.write(r.content)
         except:
@@ -165,16 +165,16 @@ def _read_GCMT_catalog(min_year=None, max_year=None):
     return cat
 
 
-def add_new_events(comm, count, min_year=None, max_year=None, 
+def add_new_events(comm, count, min_year=None, max_year=None,
                    statistical_selection=True, min_magnitude=None, max_magnitude=None):
 
     import warnings
     warnings.filterwarnings("ignore")
-    
-    # get the configuration in config file 
+
+    # get the configuration in config file
     # to gather information on requested events
     proj = comm.project
-    ds = proj.config["download_settings"]   
+    ds = proj.config["download_settings"]
     config = ds["configuration"]
     min_dist = ds["minimum_epicentral_distance_in_degree"]
     max_dist = ds["maximum_epicentral_distance_in_degree"]
@@ -188,7 +188,7 @@ def add_new_events(comm, count, min_year=None, max_year=None,
         query_inside_domain = 0
     else:
         query_inside_domain = 1
-    # The minimum acceptable distance to the next closest event in km 
+    # The minimum acceptable distance to the next closest event in km
     # for statistical selection on hypocenters
     threshold_distance_in_km = ds["minimum_adjacent_distance_in_km"]
     if min_year is None:
@@ -243,18 +243,18 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                                     minmagnitude=min_magnitude, maxmagnitude=max_magnitude,
                                     minradius=min_dist,maxradius=max_dist,
                                     latitude=central_point.latitude, longitude=central_point.longitude,
-                                    mindepth=min_depth, maxdepth=max_depth, 
+                                    mindepth=min_depth, maxdepth=max_depth,
                                     orderby="time-asc")
             print(("--> Have found %i valid filtered events with requested event criteria." % len(cat)))
         else:
             cat = client.get_events(starttime=t1, endtime=t2,
                                     minmagnitude=min_magnitude, maxmagnitude=max_magnitude,
-                                    mindepth=min_depth, maxdepth=max_depth, 
+                                    mindepth=min_depth, maxdepth=max_depth,
                                     orderby="time-asc")
         print(("--> Have found in total %d events in catalogs, need filter"%len(cat)))
-        
-        
-            
+
+
+
 
     # Filter with the magnitudes
     if Flag_filter:
@@ -282,13 +282,13 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                 event_depth_in_km = event.origins[0]["depth"]*1e-3
                 if event_depth_in_km > max_depth or event_depth_in_km < min_depth:
                     continue
-                dist_in_deg, azimuth, baz = gps2dist_azimuth(org["latitude"], 
+                dist_in_deg, azimuth, baz = gps2dist_azimuth(org["latitude"],
                                                              org["longitude"],
                                                              central_point.latitude,
                                                              central_point.longitude)
                 azimuths.append(azimuth)
                 temp_cat.events.append(event)
-                coordinates.append((org.latitude, org.longitude))      
+                coordinates.append((org.latitude, org.longitude))
         else:
             from obspy.geodetics import gps2dist_azimuth, locations2degrees
             central_point = comm.query.center()
@@ -299,11 +299,11 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                 temp_cat = Catalog()
                 for event in cat:
                     org = event.preferred_origin() or event.origins[0]
-                    dist_in_deg = locations2degrees(org["latitude"], 
+                    dist_in_deg = locations2degrees(org["latitude"],
                                                     org["longitude"],
                                                     central_point.latitude,
                                                     central_point.longitude)
-                    _dist, azimuth, _baz = gps2dist_azimuth(org["latitude"], 
+                    _dist, azimuth, _baz = gps2dist_azimuth(org["latitude"],
                                                             org["longitude"],
                                                             central_point.latitude,
                                                             central_point.longitude)
@@ -322,7 +322,7 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                 temp_cat = cat
                 for event in cat:
                     org = event.preferred_origin() or event.origins[0]
-                    dist_in_deg, azimuth, baz = gps2dist_azimuth(org["latitude"], 
+                    dist_in_deg, azimuth, baz = gps2dist_azimuth(org["latitude"],
                                                                  org["longitude"],
                                                                  central_point.latitude,
                                                                  central_point.longitude)
@@ -340,8 +340,8 @@ def add_new_events(comm, count, min_year=None, max_year=None,
             cat.events.append(temp_cat[idx])
             temp_azimuth.append(azimuths[idx])
         azimuths = temp_azimuth
-        
-        
+
+
         if not cat:
             print("--> No event left to query, Stopping")
         else:
@@ -432,13 +432,13 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                             if not exist_event:
                                 temp_cat.events.append(event)
                                 temp_azimuth.append(azimuth)
-                        
+
                         if temp_cat:
                             print(("--> %d events already stored in the database, disregard them"%(np.abs(len(cat)-len(temp_cat)))))
                             cat = temp_cat
                             azimuths = temp_azimuth
-                    
-                    
+
+
                     # sort by azimuth
                     azimuths = np.array(azimuths)
                     Isort = np.argsort(azimuths)
@@ -451,7 +451,7 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                     available_count = np.min([len(cat), count])
                     print(("\tRandom selection of %i events from a uniform distribution on event azimuth"%available_count))
                     idx = sp_randint.rvs(0, len(cat), size=available_count, random_state=0)
-                    
+
                     # check repeatitive idx
                     idx_unique,  unique_index, unique_counts = np.unique(np.array(idx), return_index=True, return_counts=True)
                     repeated_idx = [index for index, index_count in zip(idx_unique, unique_counts) if index_count>1]
@@ -465,7 +465,7 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                                     new_idx = np.random.randint(0,len(cat)-1,1)[0]
                             idx_unique.append(new_idx)
                         idx = idx_unique
-                        
+
                     for index in idx:
                         event = cat[index]
                         chosen_events.append(event)
@@ -473,7 +473,7 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                     chosen_events = cat
 
             print(("--> Selected %i events out of %i initially filtered events." %(len(chosen_events),len(cat))))
-            
+
             # read quakeml cat if downloaded from IRIS
             if download_from_iris is True:
                 print("Will download quakeMl from IRIS, this might take a while ...")
@@ -488,17 +488,20 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                         r.close()
                         continue
                     else:
-                        url = [str(line) for line in r.readlines() \
-                                       if "http://ds.iris.edu/spudservice/momenttensor/" in str(line)][0].split("\"")[1]
-                        url += "/quakeml"
+                        try:
+                            url = [str(line) for line in r.readlines() \
+                                           if "http://ds.iris.edu/spudservice/momenttensor/" in str(line)][0].split("\"")[1]
+                            url += "/quakeml"
+                        except:
+                            continue
                         try:
                             qml = sparse_quakeml_from_iris(url)
                         except:
                             continue
                     temp_cat.append(qml[0])
                 chosen_events = temp_cat
-            
-            
+
+
             # get source mechanism infos for events in catalog
             events = []
             for event in chosen_events:
@@ -521,20 +524,20 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                 event["event_info"] = event_info
             # if already events in the database, get thes infos too for the events map
             if existing_coordinates:
-                for event in existing_events: 
+                for event in existing_events:
                     events.append(event)
-            
+
             '''
             # query inventory for tations in chosen domain
             t1 = UTCDateTime(int(min_year),1,1,0,0,0)
             t2 = UTCDateTime(int(max_year),12,31,23,59,59)
             inventory = comm.downloads.query_station_inventory(t1, t2)
             '''
-            
+
             # gui for event selection
             from lasif import gui_event_query
             gui_event_query.launch_event_gui(chosen_events, events)
-            
-                
+
+
             print("Updating event cache ...")
             comm.events.update_cache()

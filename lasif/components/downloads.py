@@ -25,7 +25,7 @@ class DownloadsComponent(Component):
         MPI enabled
         """
 
-        if event_names is None and not networks.startswith("NIED"):
+        if event_names is None and (networks is None or not networks.startswith("NIED")):
             from mpi4py import MPI
             from lasif.tools.parallel_helpers import distribute_across_ranks
             events = self.comm.events.list()
