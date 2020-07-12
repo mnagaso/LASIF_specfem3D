@@ -72,6 +72,9 @@ def channel_name_converter_for_NIED2LASIF(c):
         r = "E"
     elif c == "Y":
         r = "N"
+    elif c == "Z" or c == "N" or c == "E": # keep them
+        r = c
+
 
     else:
         print("component name {} is not recognised by wavedata_writer_specfwi.py".format(c))
