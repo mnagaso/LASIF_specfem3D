@@ -53,7 +53,7 @@ class PySpeSetupWriter():
             if i_ev == 0:
                 # SPECFEM time step settings
                 self.time_length = tr_info[event]['time_length']
-                self.time_step = tr_info[event]['time_step']/40.0 # !! this should be something finer than data DT
+                self.time_step = tr_info[event]['time_step']      # this time step is cofigured in ITERATE/*.xml mannually
                 self.time_step_data = tr_info[event]['time_step'] # should be configured mannually
 
             # start/end time of SPECFEM calculation window in second (0 at event time)

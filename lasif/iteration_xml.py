@@ -455,8 +455,8 @@ def _get_default_solver_settings(solver, min_period, max_period, quiet=False):
         from lasif.utils import generate_specfem3d_globe_cem_template
         return generate_specfem3d_globe_cem_template()
     elif solver.lower() == "specfem3d_fwi":
-        from lasif.utils import generate_specfem3d_cartesian_template
-        return generate_specfem3d_cartesian_template()
+        from lasif.utils import generate_specfem3d_fwi_template
+        return generate_specfem3d_fwi_template(min_period)
     else:
         msg = "Solver '%s' not known. Known solvers: %s" % (
             solver, ",".join(known_solvers))

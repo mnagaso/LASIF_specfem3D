@@ -157,6 +157,42 @@ def generate_specfem3d_cartesian_template():
     return doc
 
 
+def generate_specfem3d_fwi_template(min_period):
+    """
+    Generates a template for SPECFEM3D fwi input files.
+
+    Returns the etree representation.
+    """
+
+    # calculate a suggestion for DT
+    ## min_period -> element size
+    low_speed = 3.8 # km/s s-wave
+    high_speed = 8.0 # km/s p-wave
+    elm_size = min_period*low_speed/2.0 # 2 elements par 1 shortest wave length
+    ## element size -> DT
+    dt = 0.5*elm_size/high_speed
+    ## number of timesteps
+    ### get download settings
+    import xml.etree.ElementTree as ET
+    tree = ET.parse('config.xml')
+    root = tree.getroot()
+    sec_before_ev = int(root.findall("download_settings/seconds_before_event")[0].text)
+    sec_after_ev  = int(root.findall("download_settings/seconds_after_event")[0].text)
+    downloaded_timelength = sec_before_ev+sec_after_ev - 180
+    nt = int(downloaded_timelength/dt)
+
+    doc = E.solver_settings(
+        E.simulation_parameters(
+            E.number_of_time_steps(str(nt)),
+            E.time_increment(str(dt))),
+        E.output_directory("../OUTPUT/CHANGE_ME/{{EVENT_NAME}}"),
+        E.computational_setup(
+            E.number_of_processors("128")))
+
+    return doc
+
+
+
 def generate_specfem3d_globe_cem_template():
     """
     Generates a template for SPECFEM3D GLOBE CEM input files.
