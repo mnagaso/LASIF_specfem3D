@@ -59,9 +59,9 @@ path_effects = [PathEffects.withStroke(linewidth=5, foreground="white")]
 
 class Window(QtWidgets.QMainWindow):
     def __init__(self, comm):
-        QtGui.QMainWindow.__init__(self)
+        QtWidgets.QMainWindow.__init__(self)
         self.comm = comm
-        self.ui = qt_window.Ui_MainWindow()  # NOQA
+        self.ui = qt_window.Ui_MainWindow()  # NOQA ### qt_window.py missing from the repository
         self.ui.setupUi(self)
 
         # Set up the map.
@@ -351,7 +351,8 @@ def launch(comm):
     compile_and_import_ui_files()
 
     # Launch and open the window.
-    app = QtGui.QApplication(sys.argv, QtGui.QApplication.GuiClient)
+    #app = QtGui.QApplication(sys.argv, QtGui.QApplication.GuiClient)
+    app = QtWidgets.QApplication(sys.argv)#, QtWidgets.QApplication.GuiClient)
     window = Window(comm)
 
     # Move window to center of screen.

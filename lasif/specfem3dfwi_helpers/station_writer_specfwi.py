@@ -42,7 +42,13 @@ class StationWriterSpecFwi():
 
         # get selected waveform data
         processing_tag = self.iteration.processing_tag
-        waveforms = self.comm.waveforms.get_metadata_processed(event_name, processing_tag)
+        try:
+            waveforms = self.comm.waveforms.get_metadata_processed(event_name, processing_tag)
+        except:
+            print("error while searching waveform data.")
+            print("this error may be caused by no preprocessed signals in a event directory.")
+            return None
+
         # store valid stations for the selected preprocess
         valid_st = []
         for waveform in waveforms:
@@ -78,4 +84,7 @@ class StationWriterSpecFwi():
 
         df = pd.DataFrame(dict_stations)
         # write
-        df.to_csv(os.path.join(self.outdir,"STATIONS_"+event_name),sep=" ", index=False, header=False)
+        st_dir = os.path.join(self.outdir,"STATIONS_FILES")
+        if not os.path.exists(st_dir):
+            os.makedirs(st_dir)
+        df.to_csv(os.path.join(st_dir,"STATIONS_"+event_name),sep=" ", index=False, header=False)

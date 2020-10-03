@@ -23,9 +23,14 @@ class WavedataWriter():
         # store some info for PySpecfem setup file
         self.tr_info = {}
 
+        # output directory for wavedata
+        wv_dir = os.path.join(self.outdir,"waveform_FILES")
+        if not os.path.exists(wv_dir):
+            os.makedirs(wv_dir)
+
         # loop over events
         for event in sorted(status.keys()):
-            outfile = os.path.join(self.outdir,"waveform_"+event+".h5")
+            outfile = os.path.join(self.outdir,wv_dir,"waveform_"+event+".h5")
             self._write(outfile, event, iteration_name)
             print(outfile,"written")
 
@@ -42,7 +47,12 @@ class WavedataWriter():
 
         # Get station and waveform infos
         station_coordinates = self.comm.query.get_all_stations_for_event(event_name)
-        waveforms = self.comm.waveforms.get_metadata_processed(event_name, processing_tag)
+        try:
+            waveforms = self.comm.waveforms.get_metadata_processed(event_name, processing_tag)
+        except:
+            print("error while searching waveform data.")
+            print("this error may be caused by no preprocessed signals in a event directory.")
+            return None
 
         # Group by station name.
         def func(x):

@@ -49,8 +49,16 @@ class PySpeSetupWriter():
         self.WAVEFORM_file_string=""
 
         # loop over events
+        c_ev = 0
         for i_ev, event in enumerate(sorted(status.keys())):
-            if i_ev == 0:
+            # check if this event has any of preprocessed signals
+            try:
+                _ = tr_info[event]
+            except:
+                print("{} has been removed because no available signals after preprocessing".format(event))
+                continue
+
+            if c_ev == 0:
                 # SPECFEM time step settings
                 self.time_length = tr_info[event]['time_length']
                 self.time_step = tr_info[event]['time_step']      # this time step is cofigured in ITERATE/*.xml mannually
@@ -61,13 +69,15 @@ class PySpeSetupWriter():
             self.TIME_END   += " "+str(tr_info[event]['time_end'])
 
             # CMT file list
-            self.CMT_file_string += "CMT_SOLUTION_FILE : CMTSOLUTION_{}\n".format(event)
+            self.CMT_file_string += "CMT_SOLUTION_FILE : CMTSOLUTION_FILES/CMTSOLUTION_{}\n".format(event)
 
             # STATION file list
-            self.STATION_file_string+= "STATION_FILE : STATIONS_{}\n".format(event)
+            self.STATION_file_string+= "STATION_FILE : STATIONS_FILES/STATIONS_{}\n".format(event)
 
             # waveform file list
-            self.WAVEFORM_file_string+= "WAVEFORM_FILE : waveform_{}.h5\n".format(event)
+            self.WAVEFORM_file_string+= "WAVEFORM_FILE : waveform_FILES/waveform_{}.h5\n".format(event)
+
+            c_ev+=1
 
         # write out
         self._create_string()
