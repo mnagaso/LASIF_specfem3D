@@ -211,6 +211,8 @@ DOMINANT_PERIOD : {self.DOMINANT_PERIOD}
 NTHETA_SLICES :  8
 NRADIAL_SLICES : 2
 
+input_directory : ./
+
 #################################################################
 #                                                               #
 #                                                               #

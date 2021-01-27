@@ -336,10 +336,13 @@ def add_new_events(comm, count, min_year=None, max_year=None,
         _u, index_unique = np.unique(np.array(event_names), return_index=True)
         cat = Catalog()
         temp_azimuth = []
+        temp_coordinates = []
         for idx in index_unique:
             cat.events.append(temp_cat[idx])
             temp_azimuth.append(azimuths[idx])
+            temp_coordinates.append(coordinates[idx])
         azimuths = temp_azimuth
+        coordinates = temp_coordinates
 
 
         if not cat:
@@ -385,6 +388,12 @@ def add_new_events(comm, count, min_year=None, max_year=None,
                     distances = kdtree.query(np.array(coordinates), k=1)[0]
                     idx = np.argmax(distances)
 
+                    print("distances: ", distances)
+                    print("selected distance: ",distances[idx])
+                    print("idx: ", idx)
+                    print("len cat: ",len(cat))
+                    print("len coordinates: ", len(coordinates))
+
                     event = cat[idx]
                     coods = coordinates[idx]
                     del cat.events[idx]
@@ -415,6 +424,7 @@ def add_new_events(comm, count, min_year=None, max_year=None,
 
                     chosen_events.append(event)
                     existing_coordinates.append(coods)
+
                     count -= 1
             else:
                 if len(cat)>count:

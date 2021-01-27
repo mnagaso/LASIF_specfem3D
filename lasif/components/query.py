@@ -64,7 +64,7 @@ class QueryComponent(Component):
         events = list(self.comm.events.get_all_events().values())
         stations_all={}
         # Here I use a loop on event waveforms, this might take a while if many events
-        # To be improved using a loop on xml files in STATIONS/StationXML 
+        # To be improved using a loop on xml files in STATIONS/StationXML
         # stations = self.comm.stations.get_details_for_filename(xmlfile)
         for event in events:
             try:
@@ -118,7 +118,7 @@ class QueryComponent(Component):
         events = list(self.comm.events.get_all_events().values())
         events_all = events[:]
         # Here I use a loop on event waveforms, this might take a while if many events
-        # To be improved using a loop on xml files in STATIONS/StationXML 
+        # To be improved using a loop on xml files in STATIONS/StationXML
         # stations = self.comm.stations.get_details_for_filename(xmlfile)
         for event in events:
             try:
@@ -170,7 +170,7 @@ class QueryComponent(Component):
         station_coordinates = self.comm.stations.get_all_channels_at_time(
             event["origin_time"])
         inventory_coordinates = self.comm.inventory_db.get_all_coordinates()
-        
+
         stations = {}
         for waveform in waveform_metadata:
             station_id = "%s.%s" % (waveform["network"], waveform["station"])
@@ -346,7 +346,7 @@ class QueryComponent(Component):
         events = {}
         for event in self.comm.events.list():
             try:
-                data = list(self.get_all_stations_for_event_for_iteration(event, 
+                data = list(self.get_all_stations_for_event_for_iteration(event,
                                                                      iteration_name).keys())
             except LASIFNotFoundError:
                 continue
@@ -438,6 +438,7 @@ class QueryComponent(Component):
                 windows = set(".".join(_i.split(".")[:2]) for _i in
                               windows.list())
                 windows = stations.intersection(windows)
+
             status[event_name]["fraction_of_stations_that_have_windows"] = \
                 float(len(windows)) / float(len(stations))
 
@@ -649,17 +650,17 @@ class QueryComponent(Component):
         from lasif import rotations
         r_lat, r_lng = rotations.rotate_lat_lon(
             c.latitude, c.longitude, domain.rotation_axis,
-            domain.rotation_angle_in_degree)	
+            domain.rotation_angle_in_degree)
         return Point(longitude=r_lng, latitude=r_lat)
-    
-    
+
+
     def domain_corners(self):
         """
         Get the corners of the domain.
         """
         import numpy as np
         domain_corners = {}
-        
+
         domain = self.comm.project.domain.extent
         min_latitude = np.min([domain.min_latitude, domain.max_latitude])
         min_longitude = np.min([domain.min_longitude, domain.max_longitude])
@@ -678,14 +679,14 @@ class QueryComponent(Component):
             {"latitude": max_latitude,
              "longitude": max_longitude}
         return domain_corners
-    
+
     def inner_domain_corners(self):
         """
         Get the corners of the inner domain.
         """
         import numpy as np
         domain_corners = {}
-        
+
         domain = self.comm.project.domain.extent_inner_border
         min_latitude = np.min([domain.min_latitude, domain.max_latitude])
         min_longitude = np.min([domain.min_longitude, domain.max_longitude])

@@ -1,5 +1,9 @@
 import os
 import obspy
+from pyproj import Proj, transform
+inProj = Proj(init='epsg:3857')
+outProj = Proj(init='epsg:4326')
+
 
 class CmtWriterSpecFwi():
     """

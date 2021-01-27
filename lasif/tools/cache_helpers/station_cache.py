@@ -160,11 +160,11 @@ class StationCache(FileInfoCache):
 
     @staticmethod
     def _extract_index_values_sacpz(filename):
-        try:
-            channels = simple_sacpz_parser(filename)
-        except BaseException:
-            msg = "Not a valid sacpz file?"
-            raise StationCacheError(msg)
+        #try:
+        channels = simple_sacpz_parser(filename)
+        #except BaseException:
+        #    msg = "Not a valid sacpz file?"
+        #    raise StationCacheError(msg)
 
         channels = [[
             _i["channel_id"], int(_i["start_date"].timestamp),

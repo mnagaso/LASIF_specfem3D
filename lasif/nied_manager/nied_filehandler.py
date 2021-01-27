@@ -25,7 +25,7 @@ def simple_sacpz_parser(filename):
     channel["latitude"]         = float(sac.stla)
     channel["longitude"]        = float(sac.stlo)
     channel["elevation_in_m"]   = float(sac.stel)
-    channel["local_depth_in_m"] = -1.*sac.stel
+    channel["local_depth_in_m"] = 0.0
 
     return [channel]
 

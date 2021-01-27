@@ -196,14 +196,14 @@ class ActionsComponent(Component):
                                                     event["latitude"], event["longitude"])
                     tts = earth_model.get_travel_times(source_depth_in_km=event["depth_in_km"],
                                                        distance_in_degree=dist_in_deg,
-                                                       phase_list=['P'])
+                                                       phase_list=['P','p','S','s'])
                     if len(tts)==0:
                         print(("No P wave for station %s"%station_name))
                         continue
                     else:
                         # check the purist name
                         if len(tts)>1:
-                            first_tt_arrival = tts[[i for i,j in enumerate(tts) if j.purist_name=='P'][0]].time
+                            first_tt_arrival = tts[[i for i,j in enumerate(tts) if j.purist_name=='P' or j.purist_name=='p' or j.purist_name=='S' or j.purist_name=='s'][0]].time
                         else:
                             first_tt_arrival  = tts[0].time
 

@@ -133,7 +133,7 @@ class WavedataWriter():
         for one_dist in distances:
             tt = earth_model.get_travel_times(source_depth_in_km=event["depth_in_km"],
                                                distance_in_degree=one_dist,
-                                               phase_list=[Phase])
+                                               phase_list=[Phase,'p','S','s'])
             tts.append(tt[0].time)
 
         return min(tts)

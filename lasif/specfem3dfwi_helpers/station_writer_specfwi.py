@@ -6,7 +6,7 @@ class StationWriterSpecFwi():
     """
     a class which
     - extracts station information for specified event
-    - writeout one singl STATION file for each event
+    - writeout one single STATION file for each event
 
     the composition of output file is:
     """
