@@ -27,7 +27,7 @@ class NiedDownloader():
     network name for NIED should be "NIED.0101" (NIED. + station code)
     """
 
-    def __init__(self,starttime=None,endtime=None,network=None,
+    def __init__(self,starttime=None,endtime=None,network=None,stations=None,
                       domain=None):
         self.starttime    = starttime
         self.endtime      = endtime
@@ -39,19 +39,29 @@ class NiedDownloader():
         self.starttime_JST = self.starttime + datetime.timedelta(hours=9)
         self.endtime_JST   = self.endtime + datetime.timedelta(hours=9)
 
+        login_ok = None
+        self.client = Client(retries=3)
+
         # authentication for NIED server
-        try:
-            user = keyring.get_password(service_id, MAGIC_USERNAME_KEY)
-            pswd = keyring.get_password(service_id, user)
-        except:
-            user = input("Username: ")
-            pswd = getpass.getpass("Password: ")
+        while(login_ok == None):
+            try:
+                user = keyring.get_password(service_id, MAGIC_USERNAME_KEY)
+                pswd = keyring.get_password(service_id, user)
+                self.client.login(user,pswd)
+                login_ok=1
+            except:
+                user = input("Username: ")
+                pswd = getpass.getpass("Password: ")
 
-            keyring.set_password(service_id, user, pswd)
-            keyring.set_password(service_id, MAGIC_USERNAME_KEY, user)
+                keyring.set_password(service_id, user, pswd)
+                keyring.set_password(service_id, MAGIC_USERNAME_KEY, user)
 
+                try:
+                    self.client.login(user,pswd)
+                    login_ok=1
+                except:
+                    pass
 
-        self.client = Client(user,pswd,retries=100)
 
         # select stations from domain boundary
         for network in self.network:
@@ -69,6 +79,9 @@ class NiedDownloader():
                                                 minlongitude=self.domain.min_longitude,
                                                 maxlongitude=self.domain.max_longitude)
 
+            if (stations != None):
+                # select stations by name
+                self.client.select_stations(network_code,stations.split(','))
 
     def download(self, outdir=None, stationdir=None):
         self.outdir    =outdir
@@ -82,8 +95,11 @@ class NiedDownloader():
             data, ctable = self.client.get_continuous_waveform(network_code,self.starttime_JST.datetime,span,outdir=output_dir)
 
         # convert waveform file format
-        self.convert_format()
-
+        try:
+            self.convert_format()
+        except:
+            pass
+        
         # make symlinks of SACPZ files in Station/SACPZ
         sacs = glob.glob(self.outdir+"/*.SAC")
         pzs  = glob.glob(self.outdir+"/*.SAC_PZ")

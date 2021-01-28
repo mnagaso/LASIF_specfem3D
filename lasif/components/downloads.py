@@ -19,7 +19,7 @@ class DownloadsComponent(Component):
     :param communicator: The communicator instance.
     :param component_name: The name of this component for the communicator.
     """
-    def download_data(self, event_names=None, providers=None, networks=None):
+    def download_data(self, event_names=None, providers=None, networks=None, stations=None):
         """
         Download waveforms and station info on a loop of events available in EVENTS
         MPI enabled
@@ -51,13 +51,15 @@ class DownloadsComponent(Component):
         if event_names is None and networks.startswith("NIED"):
             event_names = self.comm.events.list()
             for event in event_names:
-                self.comm.downloads.download_data_for_one_event(event, providers=providers, networks=networks)
+                self.comm.downloads.download_data_for_one_event(event, providers=providers, networks=networks, stations=stations)
         else:
             for event in event_names:
-                self.comm.downloads.download_data_for_one_event(event, providers=providers, networks=networks)
+                try:
+                    self.comm.downloads.download_data_for_one_event(event, providers=providers, networks=networks)
+                except:
+                    print("waveform download for {} stopped by an error. skipped.".format(event))
 
-
-    def download_data_for_one_event(self, event, providers=None, networks = None):
+    def download_data_for_one_event(self, event, providers=None, networks=None, stations=None):
         event = self.comm.events.get(event)
 
         from obspy.clients.fdsn.mass_downloader import \
@@ -133,6 +135,7 @@ class DownloadsComponent(Component):
                                  endtime=endtime,
                                  network=networks,
                                  domain=proj.domain,
+                                 stations=stations
                                  )
             sacpaz_path=self.comm.project.paths["sacpz"]
             dlh.download(outdir=mseed_storage,stationdir=sacpaz_path)

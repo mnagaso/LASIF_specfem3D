@@ -637,6 +637,10 @@ def lasif_download_data(parser, args):
     parser.add_argument("--networks", default=None,
                         type=str,
                         help="seismic networks (comma separated) to download in the domain, eg. ``IU,G`` ")
+    parser.add_argument("--stations", default=None,
+                        type=str,
+                        help="station names")
+
 
     args = parser.parse_args(args)
     events = args.events if args.events else None
@@ -649,6 +653,7 @@ def lasif_download_data(parser, args):
     else:
         Providers = None
     Networks = args.networks
+    Stations = args.stations
 
     comm = _find_project_comm(".", args.read_only_caches)
 
@@ -670,7 +675,7 @@ def lasif_download_data(parser, args):
     if exceptions:
         raise LASIFCommandLineException(exceptions[0])
 
-    comm.downloads.download_data(events, providers=Providers, networks=Networks)
+    comm.downloads.download_data(events, providers=Providers, networks=Networks, stations=Stations)
 
 
 @command_group("Event Management")

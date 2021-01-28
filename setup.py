@@ -43,7 +43,7 @@ def get_package_data():
 
 setup_config = dict(
     name="lasif",
-    version="0.1.x",
+    version="0.2.0",
     description="",
     author="Lion Krischer and Andreas Fichtner",
     author_email="krischer@geophysik.uni-muenchen.de",
