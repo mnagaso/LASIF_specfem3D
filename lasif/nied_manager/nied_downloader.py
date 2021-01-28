@@ -40,7 +40,7 @@ class NiedDownloader():
         self.endtime_JST   = self.endtime + datetime.timedelta(hours=9)
 
         login_ok = None
-        self.client = Client(retries=3)
+        self.client = Client(retries=5,sleep_time_in_seconds=10)
 
         # authentication for NIED server
         while(login_ok == None):
@@ -99,7 +99,7 @@ class NiedDownloader():
             self.convert_format()
         except:
             pass
-        
+
         # make symlinks of SACPZ files in Station/SACPZ
         sacs = glob.glob(self.outdir+"/*.SAC")
         pzs  = glob.glob(self.outdir+"/*.SAC_PZ")

@@ -55,7 +55,7 @@ class DownloadsComponent(Component):
         else:
             for event in event_names:
                 try:
-                    self.comm.downloads.download_data_for_one_event(event, providers=providers, networks=networks)
+                    self.comm.downloads.download_data_for_one_event(event, providers=providers, networks=networks, stations=stations)
                 except:
                     print("waveform download for {} stopped by an error. skipped.".format(event))
 
