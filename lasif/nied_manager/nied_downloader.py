@@ -159,7 +159,7 @@ class NiedDownloader():
                 pass
 
         for sac in sacs:
-            try: # make symlink if not exits
+            try: # make hardlink if not exits
                 # modify the filename
                 sep=sac.split(".")
                 sep[-2] = channel_name_converter_for_NIED2LASIF(sep[-2])
@@ -169,16 +169,13 @@ class NiedDownloader():
                 # to be found by station_cache registration process.
                 link_name=self.outdir.split("/")[-2]+"_"+os.path.basename(sac_mod)
                 print(link_name)
-                os.symlink(sac_mod, os.path.join(stationdir,link_name))
+                os.link(sac_mod, os.path.join(stationdir,link_name))
             except:
                 pass
 
         # pz files are replaced into the station files
         for pz in pzs:
-            #try:
-                shutil.move(pz, os.path.join(stationdir,os.path.basename(pz)))
-            #except:
-            #    pass
+            shutil.move(pz, os.path.join(stationdir,os.path.basename(pz)))
 
     def convert_format(self):
         network_dirs = [ f.path for f in os.scandir(self.outdir) if f.is_dir() ]
@@ -195,15 +192,6 @@ class NiedDownloader():
                 win32.extract_sac(data,ctable,outdir=self.outdir)
                 # extract instrumental responses
                 win32.extract_pz(ctable,outdir=self.outdir)
-
-            # convert SACPZ to mseed for LASIF's requirement
-            #sacs = glob.glob(self.outdir+"/*.SAC")
-            #for sac in sacs:
-            #    try:
-            #        st = obspy.read(sac)
-            #        st.write(sac.rstrip(".SAC")+".mseed",format="MSEED")
-            #    except:
-            #        print("{} skipped. some problem on this file.".format(sac))
 
             # erase the win32 format datafile
             shutil.rmtree(network_dir)

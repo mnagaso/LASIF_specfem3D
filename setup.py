@@ -71,7 +71,6 @@ setup_config = dict(
         "geojson",
         "HinetPy",
         "Pillow",
-        "instaseis",
         "h5py",
         "keyring",
         "obspyh5"
